@@ -1,26 +1,14 @@
-import { Spinner, Card, CardBody, Button } from "@nextui-org/react";
+import { Spinner, Card, CardBody } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/github-markdown-custom.css";
 import { useTheme } from "next-themes";
-import { useEffect, useState, useCallback } from "react";
-import { Copy } from "lucide-react";
+import { useEffect, useState } from "react";
 
-interface Message {
-  id?: string;
-  role: "user" | "assistant";
-  text: string;
-  timestamp: string | Date;
-}
-
-interface MessageConteinerProps {
-  messages: Message[];
-  loading: boolean;
-}
-
-const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/g;
+import { MessageConteinerProps } from "@/types/index";
 
 export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
   const { theme } = useTheme();
+  // Specify the type as an object with string keys and string values
   const [renderedMessages, setRenderedMessages] = useState<
     Record<string, string>
   >({});
@@ -36,6 +24,7 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
       const rendered: Record<string, string> = {};
 
       for (const message of messages) {
+        // Ensure we're using the timestamp string as the key
         const key =
           typeof message.timestamp === "string"
             ? message.timestamp
@@ -49,66 +38,28 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
     renderMessages();
   }, [messages]);
 
-  const handleCopyTable = useCallback((messageText: string) => {
-    const tableMatch = TABLE_REGEX.exec(messageText);
-
-    if (tableMatch) {
-      const markdownTable = tableMatch[0];
-      const rows = markdownTable
-        .split("\n")
-        .slice(2) // Skip header and separator rows
-        .filter((row) => row.trim()) // Remove empty rows
-        .map((row) => row.replace(/^\||\|$/g, "")); // Remove leading/trailing pipes
-
-      const tsvContent = rows
-        .map((row) =>
-          row
-            .split("|")
-            .map((cell) => cell.trim().replace(/^-/, "–"))
-            .join("\t"),
-        )
-        .join("\n");
-
-      navigator.clipboard.writeText(tsvContent);
-    }
-  }, []);
-
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message: Message, index: number) => {
+      {messages.map((message, index) => {
+        // Get the key in the same way
         const messageKey =
           typeof message.timestamp === "string"
             ? message.timestamp
             : message.timestamp.toISOString();
-
-        const hasTable = TABLE_REGEX.test(message.text);
-
-        // Reset lastIndex because test() advances it
-        TABLE_REGEX.lastIndex = 0;
 
         return (
           <Card
             key={index}
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
-            } max-w-full`}
+            } max-w-[80%]`}
             shadow="sm"
           >
             <CardBody>
-              <div className="flex items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-semibold">
                   {message.role === "user" ? "Вы" : "TenderNinja"}
                 </span>
-                {hasTable && (
-                  <Button
-                    isIconOnly
-                    size="sm"
-                    variant="light"
-                    onClick={() => handleCopyTable(message.text)}
-                  >
-                    <Copy size={16} />
-                  </Button>
-                )}
               </div>
               <div
                 dangerouslySetInnerHTML={{
@@ -131,6 +82,7 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
           </CardBody>
         </Card>
       )}
+      {/* Add empty space at the bottom for scrolling */}
       <div className="h-16" />
     </div>
   );

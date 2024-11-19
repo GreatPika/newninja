@@ -5,25 +5,11 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback } from "react";
 import { Copy } from "lucide-react";
 
-interface Message {
-  id?: string;
-  role: "user" | "assistant";
-  text: string;
-  timestamp: string | Date;
-}
-
-interface MessageConteinerProps {
-  messages: Message[];
-  loading: boolean;
-}
-
 const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/g;
 
-export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
+export function MessageContainer({ messages, loading }) {
   const { theme } = useTheme();
-  const [renderedMessages, setRenderedMessages] = useState<
-    Record<string, string>
-  >({});
+  const [renderedMessages, setRenderedMessages] = useState({});
 
   useEffect(() => {
     if (theme) {
@@ -33,56 +19,57 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
 
   useEffect(() => {
     const renderMessages = async () => {
-      const rendered: Record<string, string> = {};
-
+      const rendered = {};
       for (const message of messages) {
-        const key =
-          typeof message.timestamp === "string"
-            ? message.timestamp
-            : message.timestamp.toISOString();
-
+        const key = typeof message.timestamp === "string" 
+          ? message.timestamp 
+          : message.timestamp.toISOString();
         rendered[key] = await marked(message.text);
       }
       setRenderedMessages(rendered);
     };
-
     renderMessages();
   }, [messages]);
 
-  const handleCopyTable = useCallback((messageText: string) => {
+  const handleCopyTable = useCallback((messageText) => {
     const tableMatch = TABLE_REGEX.exec(messageText);
-
+    
     if (tableMatch) {
       const markdownTable = tableMatch[0];
       const rows = markdownTable
         .split("\n")
         .slice(2) // Skip header and separator rows
-        .filter((row) => row.trim()) // Remove empty rows
-        .map((row) => row.replace(/^\||\|$/g, "")); // Remove leading/trailing pipes
+        .filter(row => row.trim()) // Remove empty rows
+        .map(row => row.replace(/^\||\|$/g, "")); // Remove leading/trailing pipes
 
       const tsvContent = rows
-        .map((row) =>
+        .map(row =>
           row
             .split("|")
-            .map((cell) => cell.trim().replace(/^-/, "–"))
-            .join("\t"),
+            .map(cell => cell.trim().replace(/^-/, "–"))
+            .join("\t")
         )
         .join("\n");
 
-      navigator.clipboard.writeText(tsvContent);
+      navigator.clipboard.writeText(tsvContent)
+        .then(() => {
+          // You could add a toast notification here
+          console.log("Table copied to clipboard!");
+        })
+        .catch(err => {
+          console.error("Failed to copy table:", err);
+        });
     }
   }, []);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message: Message, index: number) => {
-        const messageKey =
-          typeof message.timestamp === "string"
-            ? message.timestamp
-            : message.timestamp.toISOString();
-
+      {messages.map((message, index) => {
+        const messageKey = typeof message.timestamp === "string"
+          ? message.timestamp
+          : message.timestamp.toISOString();
+        
         const hasTable = TABLE_REGEX.test(message.text);
-
         // Reset lastIndex because test() advances it
         TABLE_REGEX.lastIndex = 0;
 
@@ -91,7 +78,7 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
             key={index}
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
-            } max-w-full`}
+            } max-w-[80%]`}
             shadow="sm"
           >
             <CardBody>
@@ -101,10 +88,10 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
                 </span>
                 {hasTable && (
                   <Button
-                    isIconOnly
                     size="sm"
                     variant="light"
                     onClick={() => handleCopyTable(message.text)}
+                    className="min-w-unit-8 w-8 h-8"
                   >
                     <Copy size={16} />
                   </Button>

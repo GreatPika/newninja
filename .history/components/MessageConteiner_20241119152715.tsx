@@ -91,7 +91,7 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
             key={index}
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
-            } max-w-full`}
+            } max-w-[80%]`}
             shadow="sm"
           >
             <CardBody>
@@ -101,7 +101,6 @@ export function MessageConteiner({ messages, loading }: MessageConteinerProps) {
                 </span>
                 {hasTable && (
                   <Button
-                    isIconOnly
                     size="sm"
                     variant="light"
                     onClick={() => handleCopyTable(message.text)}
