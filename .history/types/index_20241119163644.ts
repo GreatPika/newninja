@@ -1,8 +1,8 @@
 export interface Message {
-  id?: number;
+  id?: number; // Уникальный идентификатор (number)
   text: string;
-  role: "user" | "assistant";
-  timestamp: Date;
+  role: 'user' | 'assistant';
+  timestamp: Date; // Хранение как Date
 }
 
 export interface ChatContainerProps {
@@ -22,11 +22,13 @@ export interface RunFlowParams {
 export interface LangflowResponse {
   outputs: Array<{
     outputs: Array<{
-      results: {
+      outputs: Array<{
         message: {
-          text: string;
+          message: {
+            text: string;
+          };
         };
-      };
+      }>;
     }>;
   }>;
 }

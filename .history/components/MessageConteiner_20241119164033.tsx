@@ -11,15 +11,9 @@ import { handleCopyTable } from "@/utils/handleCopyTable";
 
 const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/g;
 
-export function MessageConteiner({
-  messages,
-  loading,
-  onDelete,
-}: MessageConteinerProps) {
+export function MessageConteiner({ messages, loading, onDelete }: MessageConteinerProps) {
   const { theme } = useTheme();
-  const [renderedMessages, setRenderedMessages] = useState<
-    Record<string, string>
-  >({});
+  const [renderedMessages, setRenderedMessages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (theme) {
@@ -33,7 +27,6 @@ export function MessageConteiner({
 
       for (const message of messages) {
         const key = message.timestamp.toISOString(); // Убедитесь, что timestamp - Date
-
         rendered[key] = await marked(message.text);
       }
       setRenderedMessages(rendered);
@@ -42,9 +35,12 @@ export function MessageConteiner({
     renderMessages();
   }, [messages]);
 
-  const onCopyTableHandler = useCallback((messageText: string) => {
-    handleCopyTable(messageText);
-  }, []);
+  const onCopyTableHandler = useCallback(
+    (messageText: string) => {
+      handleCopyTable(messageText);
+    },
+    [],
+  );
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">

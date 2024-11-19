@@ -11,11 +11,7 @@ import {
   LangflowResponse,
 } from "@/types/index";
 import { LangflowClient } from "@/utils/langflow-client";
-import {
-  addMessage as dbAddMessage,
-  getAllMessages as dbGetAllMessages,
-  deleteMessage as dbDeleteMessage,
-} from "@/utils/indexedDB";
+import { addMessage as dbAddMessage, getAllMessages as dbGetAllMessages, deleteMessage as dbDeleteMessage, MessageDB } from "@/utils/indexedDB";
 
 export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -24,8 +20,7 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
   // Загрузка сообщений из IndexedDB при монтировании
   useEffect(() => {
     const loadMessages = async () => {
-      if (typeof window !== "undefined") {
-        // Проверка на клиентскую сторону
+      if (typeof window !== 'undefined') { // Проверка на клиентскую сторону
         try {
           const storedMessages = await dbGetAllMessages();
           // Преобразуем сообщения из базы данных в формат, используемый в состоянии
@@ -35,7 +30,6 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
             role: msg.role,
             timestamp: new Date(msg.timestamp),
           }));
-
           setMessages(formattedMessages);
         } catch (error) {
           console.error("Ошибка при загрузке сообщений из IndexedDB:", error);
@@ -64,11 +58,11 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
           role: userMessage.role,
           timestamp: userMessage.timestamp.toISOString(),
         });
-
+        // Добавляем ID, полученный из IndexedDB, в состояние
         setMessages((prev) =>
           prev.map((msg, idx) =>
-            idx === prev.length - 1 ? { ...msg, id } : msg,
-          ),
+            idx === prev.length - 1 ? { ...msg, id } : msg
+          )
         );
       } catch (error) {
         console.error("Ошибка при сохранении сообщения пользователя:", error);
@@ -85,12 +79,13 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
         };
 
         const response: LangflowResponse = await client.runFlow(params);
-
+        
+        // Логирование ответа для отладки
         console.log("LangflowResponse:", JSON.stringify(response, null, 2));
 
-        // Извлекаем сообщение ассистента из ответа
+        // Корректный путь к сообщению ассистента
         const responseMessage =
-          response.outputs?.[0]?.outputs?.[0]?.results?.message?.text;
+          response?.outputs?.[0]?.outputs?.[0]?.message?.message?.text;
 
         if (responseMessage) {
           const assistantMessage: Message = {
@@ -108,11 +103,11 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
               role: assistantMessage.role,
               timestamp: assistantMessage.timestamp.toISOString(),
             });
-
+            // Добавляем ID, полученный из IndexedDB, в состояние
             setMessages((prev) =>
               prev.map((msg, idx) =>
-                idx === prev.length - 1 ? { ...msg, id } : msg,
-              ),
+                idx === prev.length - 1 ? { ...msg, id } : msg
+              )
             );
           } catch (error) {
             console.error("Ошибка при сохранении сообщения ассистента:", error);
@@ -130,26 +125,25 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
   );
 
   // Функция удаления сообщения
-  const handleDeleteMessage = useCallback(async (id?: number) => {
-    if (id === undefined) return;
-    try {
-      await dbDeleteMessage(id);
-      // Обновляем состояние, удаляя сообщение с заданным ID
-      setMessages((prev) => prev.filter((msg) => msg.id !== id));
-    } catch (error) {
-      console.error("Ошибка при удалении сообщения:", error);
-    }
-  }, []);
+  const handleDeleteMessage = useCallback(
+    async (id?: number) => {
+      if (id === undefined) return;
+      try {
+        await dbDeleteMessage(id);
+        // Обновляем состояние, удаляя сообщение с заданным ID
+        setMessages((prev) => prev.filter((msg) => msg.id !== id));
+      } catch (error) {
+        console.error("Ошибка при удалении сообщения:", error);
+      }
+    },
+    [],
+  );
 
   return (
     <div className="flex flex-col min-h-screen relative">
       {/* Сообщения */}
       <div className="w-[800px] mx-auto flex flex-col bg-background flex-grow pb-20">
-        <MessageConteiner
-          loading={loading}
-          messages={messages}
-          onDelete={handleDeleteMessage}
-        />
+        <MessageConteiner loading={loading} messages={messages} onDelete={handleDeleteMessage} />
       </div>
 
       {/* Фиксированный промпт внизу */}

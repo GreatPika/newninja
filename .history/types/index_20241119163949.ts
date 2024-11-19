@@ -1,8 +1,9 @@
+// types/index.ts
 export interface Message {
-  id?: number;
+  id?: number; // Изменено с string на number
   text: string;
-  role: "user" | "assistant";
-  timestamp: Date;
+  role: 'user' | 'assistant';
+  timestamp: Date; // Убедитесь, что timestamp всегда типа Date
 }
 
 export interface ChatContainerProps {
@@ -22,7 +23,7 @@ export interface RunFlowParams {
 export interface LangflowResponse {
   outputs: Array<{
     outputs: Array<{
-      results: {
+      message: {
         message: {
           text: string;
         };
@@ -34,5 +35,5 @@ export interface LangflowResponse {
 export interface MessageConteinerProps {
   messages: Message[];
   loading: boolean;
-  onDelete: (id?: number) => void;
+  onDelete: (id?: number) => void; // Добавлено свойство onDelete
 }

@@ -65,6 +65,7 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
           timestamp: userMessage.timestamp.toISOString(),
         });
 
+        // Добавляем ID, полученный из IndexedDB, в состояние
         setMessages((prev) =>
           prev.map((msg, idx) =>
             idx === prev.length - 1 ? { ...msg, id } : msg,
@@ -85,12 +86,8 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
         };
 
         const response: LangflowResponse = await client.runFlow(params);
-
-        console.log("LangflowResponse:", JSON.stringify(response, null, 2));
-
-        // Извлекаем сообщение ассистента из ответа
         const responseMessage =
-          response.outputs?.[0]?.outputs?.[0]?.results?.message?.text;
+          response?.outputs?.[0]?.outputs?.[0]?.outputs?.message?.message?.text;
 
         if (responseMessage) {
           const assistantMessage: Message = {
@@ -109,6 +106,7 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
               timestamp: assistantMessage.timestamp.toISOString(),
             });
 
+            // Добавляем ID, полученный из IndexedDB, в состояние
             setMessages((prev) =>
               prev.map((msg, idx) =>
                 idx === prev.length - 1 ? { ...msg, id } : msg,
@@ -117,8 +115,6 @@ export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
           } catch (error) {
             console.error("Ошибка при сохранении сообщения ассистента:", error);
           }
-        } else {
-          console.warn("Не удалось извлечь сообщение от ассистента из ответа.");
         }
       } catch (error) {
         console.error("Failed to get response:", error);

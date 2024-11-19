@@ -11,11 +11,15 @@ import { handleCopyTable } from "@/utils/handleCopyTable";
 
 const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/g;
 
+interface ExtendedMessageConteinerProps extends MessageConteinerProps {
+  onDelete: (id?: number) => void;
+}
+
 export function MessageConteiner({
   messages,
   loading,
   onDelete,
-}: MessageConteinerProps) {
+}: ExtendedMessageConteinerProps) {
   const { theme } = useTheme();
   const [renderedMessages, setRenderedMessages] = useState<
     Record<string, string>
@@ -32,7 +36,10 @@ export function MessageConteiner({
       const rendered: Record<string, string> = {};
 
       for (const message of messages) {
-        const key = message.timestamp.toISOString(); // Убедитесь, что timestamp - Date
+        const key =
+          typeof message.timestamp === "string"
+            ? message.timestamp
+            : message.timestamp.toISOString();
 
         rendered[key] = await marked(message.text);
       }
@@ -42,14 +49,20 @@ export function MessageConteiner({
     renderMessages();
   }, [messages]);
 
-  const onCopyTableHandler = useCallback((messageText: string) => {
-    handleCopyTable(messageText);
-  }, []);
+  const onCopyTable = useCallback(
+    (messageText: string) => {
+      handleCopyTable(messageText);
+    },
+    [], // Dependencies can be added here if necessary
+  );
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message: Message) => {
-        const messageKey = message.timestamp.toISOString();
+      {messages.map((message: Message, index: number) => {
+        const messageKey =
+          typeof message.timestamp === "string"
+            ? message.timestamp
+            : message.timestamp.toISOString();
 
         const hasTable = TABLE_REGEX.test(message.text);
 
@@ -58,7 +71,7 @@ export function MessageConteiner({
 
         return (
           <Card
-            key={message.id ?? messageKey} // Используем id, если доступен, иначе timestamp
+            key={message.id ?? index} // Используем id, если доступен
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
             } max-w-full`}
@@ -75,7 +88,7 @@ export function MessageConteiner({
                       isIconOnly
                       size="sm"
                       variant="light"
-                      onClick={() => onCopyTableHandler(message.text)}
+                      onClick={() => onCopyTable(message.text)}
                     >
                       <Copy size={16} />
                     </Button>
@@ -100,7 +113,7 @@ export function MessageConteiner({
                 className="markdown-body"
               />
               <div className="text-xs text-gray-500 mt-2">
-                {message.timestamp.toLocaleTimeString()}
+                {new Date(message.timestamp).toLocaleTimeString()}
               </div>
             </CardBody>
           </Card>
