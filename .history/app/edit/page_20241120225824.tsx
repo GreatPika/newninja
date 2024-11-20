@@ -1,43 +1,37 @@
-/* eslint-disable no-console */
 "use client";
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
-
-import { updateMessage } from "@/utils/indexedDB";
+import { useSearchParams, useRouter } from "next/navigation";
+import { updateMessageInDB } from "@/utils/messages";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
-  loading: () => <div>Загрузка редактора...</div>,
+  loading: () => <div>Загрузка редактора...</div>
 });
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
+  const [messageId, setMessageId] = useState<number | null>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const content = searchParams.get("content");
-
-    if (content) {
+    const id = searchParams.get("id");
+    
+    if (content && id) {
       const decodedContent = decodeURIComponent(content);
-
       setMarkdown(decodedContent);
+      setMessageId(Number(id));
       setIsEditorReady(true);
     }
   }, [searchParams]);
 
-  const handleContentChange = async (content: string) => {
-    const messageId = searchParams.get("id");
-
+  const handleSave = async (newContent: string) => {
     if (messageId) {
-      try {
-        await updateMessage(parseInt(messageId), content);
-        console.log("Изменения сохранены");
-      } catch (error) {
-        console.error("Ошибка при сохранении изменений:", error);
-      }
+      await updateMessageInDB(messageId, newContent);
     }
   };
 
@@ -49,10 +43,11 @@ export default function EditPage() {
     <>
       <h1 className="text-2xl font-bold mb-4">Редактор</h1>
       <div>
-        <Editor
-          key={markdown}
-          markdown={markdown}
-          onContentChange={handleContentChange}
+        <Editor 
+          key={markdown} 
+          markdown={markdown} 
+          messageId={messageId ?? undefined}
+          onSave={handleSave}
         />
       </div>
     </>

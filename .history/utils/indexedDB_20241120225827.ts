@@ -59,18 +59,15 @@ export const deleteMessage = async (id: number): Promise<void> => {
   await tx.done;
 };
 
-export const updateMessage = async (
-  id: number,
-  content: string,
-): Promise<void> => {
+export const updateMessage = async (id: number, text: string): Promise<void> => {
   const db = await initializeDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
+  
   const message = await tx.store.get(id);
-
   if (message) {
-    message.text = content;
+    message.text = text;
     await tx.store.put(message);
   }
-
+  
   await tx.done;
 };

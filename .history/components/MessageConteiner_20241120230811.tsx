@@ -49,9 +49,7 @@ export function MessageConteiner({
   }, []);
 
   const handleEdit = (message: Message) => {
-    router.push(
-      `/edit?id=${message.id}&content=${encodeURIComponent(message.text)}`,
-    );
+    router.push(`/edit?id=${message.id}&content=${encodeURIComponent(message.text)}`);
   };
 
   return (

@@ -61,16 +61,16 @@ export const deleteMessage = async (id: number): Promise<void> => {
 
 export const updateMessage = async (
   id: number,
-  content: string,
+  content: string
 ): Promise<void> => {
   const db = await initializeDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
   const message = await tx.store.get(id);
-
+  
   if (message) {
     message.text = content;
     await tx.store.put(message);
   }
-
+  
   await tx.done;
 };

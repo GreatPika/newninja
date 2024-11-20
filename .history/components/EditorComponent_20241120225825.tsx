@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 "use client";
 
 import {
@@ -29,12 +30,12 @@ import { FC } from "react";
 
 interface EditorProps {
   markdown: string;
-  editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   messageId?: number;
-  onContentChange?: (content: string) => void;
+  onSave?: (text: string) => void;
+  editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
 }
 
-const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
+const Editor: FC<EditorProps> = ({ markdown, messageId, onSave, editorRef }) => {
   return (
     <MDXEditor
       ref={editorRef}
@@ -69,8 +70,8 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
         }),
       ]}
       onChange={(content) => {
-        if (onContentChange) {
-          onContentChange(content);
+        if (onSave) {
+          onSave(content);
         }
       }}
     />

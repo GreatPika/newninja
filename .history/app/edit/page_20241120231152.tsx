@@ -49,9 +49,9 @@ export default function EditPage() {
     <>
       <h1 className="text-2xl font-bold mb-4">Редактор</h1>
       <div>
-        <Editor
+        <Editor 
           key={markdown}
-          markdown={markdown}
+          markdown={markdown} 
           onContentChange={handleContentChange}
         />
       </div>

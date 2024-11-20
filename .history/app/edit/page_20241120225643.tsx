@@ -1,11 +1,8 @@
-/* eslint-disable no-console */
 "use client";
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-
-import { updateMessage } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
@@ -28,19 +25,6 @@ export default function EditPage() {
     }
   }, [searchParams]);
 
-  const handleContentChange = async (content: string) => {
-    const messageId = searchParams.get("id");
-
-    if (messageId) {
-      try {
-        await updateMessage(parseInt(messageId), content);
-        console.log("Изменения сохранены");
-      } catch (error) {
-        console.error("Ошибка при сохранении изменений:", error);
-      }
-    }
-  };
-
   if (!isEditorReady) {
     return <div>Загрузка...</div>;
   }
@@ -49,11 +33,7 @@ export default function EditPage() {
     <>
       <h1 className="text-2xl font-bold mb-4">Редактор</h1>
       <div>
-        <Editor
-          key={markdown}
-          markdown={markdown}
-          onContentChange={handleContentChange}
-        />
+        <Editor key={markdown} markdown={markdown} />
       </div>
     </>
   );
