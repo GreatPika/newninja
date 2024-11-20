@@ -10,7 +10,7 @@ import {
   getAssistantResponse,
 } from "@/utils/messages";
 
-export function ChatContainer({ baseURL }: ChatContainerProps) {
+export function ChatContainer({ flowId, apiKey, baseURL }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +27,6 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
   const handleSubmit = useCallback(
     async (text: string) => {
       setLoading(true);
-
       const userMessage: Message = {
         text,
         role: "user",
@@ -35,6 +34,7 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
       };
 
       setMessages((prev) => [...prev, userMessage]);
+
       const messageId = await saveMessageToDB(userMessage);
 
       setMessages((prev) =>
@@ -43,10 +43,16 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
         ),
       );
 
-      const assistantMessage = await getAssistantResponse(text, baseURL);
+      const assistantMessage = await getAssistantResponse(
+        text,
+        flowId,
+        baseURL,
+        apiKey,
+      );
 
       if (assistantMessage) {
         setMessages((prev) => [...prev, assistantMessage]);
+
         const assistantMessageId = await saveMessageToDB(assistantMessage);
 
         setMessages((prev) =>
@@ -58,11 +64,12 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
 
       setLoading(false);
     },
-    [baseURL],
+    [flowId, apiKey, baseURL],
   );
 
   const handleDeleteMessage = useCallback(async (id?: number) => {
     if (id === undefined) return;
+
     await deleteMessageFromDB(id);
     setMessages((prev) => prev.filter((msg) => msg.id !== id));
   }, []);

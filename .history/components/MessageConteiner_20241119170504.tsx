@@ -73,7 +73,6 @@ export function MessageConteiner({
                   {hasTable && (
                     <Button
                       isIconOnly
-                      radius="md"
                       size="sm"
                       variant="light"
                       onClick={() => onCopyTableHandler(message.text)}
@@ -81,10 +80,10 @@ export function MessageConteiner({
                       <Copy size={16} />
                     </Button>
                   )}
+                  {/* Кнопка удаления */}
                   {message.id !== undefined && (
                     <Button
                       isIconOnly
-                      radius="md"
                       size="sm"
                       variant="light"
                       onClick={() => onDelete(message.id)}

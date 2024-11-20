@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-
 import { PromptInput } from "@/components/PromptInput";
 import { MessageConteiner } from "@/components/MessageConteiner";
 import { Message, ChatContainerProps } from "@/types/index";
@@ -17,7 +16,6 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
   useEffect(() => {
     const loadMessages = async () => {
       const storedMessages = await loadMessagesFromDB();
-
       setMessages(storedMessages);
     };
 
@@ -27,7 +25,7 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
   const handleSubmit = useCallback(
     async (text: string) => {
       setLoading(true);
-
+      
       const userMessage: Message = {
         text,
         role: "user",
