@@ -37,7 +37,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef }) => {
   return (
     <MDXEditor
       ref={editorRef}
-      markdown={markdown || ""}
+      markdown={markdown || ''}
       plugins={[
         // Основные плагины
         headingsPlugin(),

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
-  loading: () => <div>Загрузка редактора...</div>,
+  loading: () => <div>Загрузка редактора...</div>
 });
 
 export default function EditPage() {
@@ -16,10 +17,8 @@ export default function EditPage() {
 
   useEffect(() => {
     const content = searchParams.get("content");
-
     if (content) {
       const decodedContent = decodeURIComponent(content);
-
       setMarkdown(decodedContent);
       setIsEditorReady(true);
     }
