@@ -47,7 +47,6 @@ export default function EditPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
       <div>
         <Editor
           key={markdown}

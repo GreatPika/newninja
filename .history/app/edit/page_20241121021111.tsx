@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-
+import EditorLayout from "./layout";
 import { updateMessage } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
@@ -45,16 +45,18 @@ export default function EditPage() {
     return <div className="text-default-500">Загрузка...</div>;
   }
 
-  return (
-    <>
-      <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
-      <div>
+  const content = (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-bold text-default-900">Редактор</h1>
+      <div className="w-full">
         <Editor
           key={markdown}
           markdown={markdown}
           onContentChange={handleContentChange}
         />
       </div>
-    </>
+    </div>
   );
+
+  return <EditorLayout>{content}</EditorLayout>;
 }

@@ -1,5 +1,5 @@
 "use client";
-import "@/styles/editor-styles.css";
+
 import {
   MDXEditor,
   MDXEditorMethods,
@@ -39,14 +39,14 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
   const { theme } = useTheme();
 
   const getEditorClassName = () => {
-    return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
+    return theme === 'dark' ? 'dark-theme dark-editor' : 'light-editor';
   };
 
   return (
     <MDXEditor
       ref={editorRef}
-      className={getEditorClassName()}
       markdown={markdown || ""}
+      className={getEditorClassName()}
       plugins={[
         headingsPlugin(),
         listsPlugin(),

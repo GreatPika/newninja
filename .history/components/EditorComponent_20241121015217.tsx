@@ -1,5 +1,5 @@
 "use client";
-import "@/styles/editor-styles.css";
+
 import {
   MDXEditor,
   MDXEditorMethods,

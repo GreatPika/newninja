@@ -9,7 +9,7 @@ import { updateMessage } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
-  loading: () => <div className="text-default-500">Загрузка редактора...</div>,
+  loading: () => <div className="text-foreground">Загрузка редактора...</div>,
 });
 
 export default function EditPage() {
@@ -42,19 +42,25 @@ export default function EditPage() {
   };
 
   if (!isEditorReady) {
-    return <div className="text-default-500">Загрузка...</div>;
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        Загрузка...
+      </div>
+    );
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
-      <div>
-        <Editor
-          key={markdown}
-          markdown={markdown}
-          onContentChange={handleContentChange}
-        />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold mb-4 text-foreground">Редактор</h1>
+        <div className="bg-background">
+          <Editor
+            key={markdown}
+            markdown={markdown}
+            onContentChange={handleContentChange}
+          />
+        </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -16,9 +16,7 @@ export function MessageConteiner({
   onDelete,
 }: MessageConteinerProps) {
   const { theme } = useTheme();
-  const [renderedMessages, setRenderedMessages] = useState<
-    Record<string, string>
-  >({});
+  const [renderedMessages, setRenderedMessages] = useState<Record<string, string>>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -33,7 +31,6 @@ export function MessageConteiner({
 
       for (const message of messages) {
         const key = message.timestamp.toISOString();
-
         rendered[key] = await marked(message.text);
       }
       setRenderedMessages(rendered);
@@ -57,9 +54,9 @@ export function MessageConteiner({
       {messages.map((message: Message) => {
         const messageKey = message.timestamp.toISOString();
         const renderedContent = renderedMessages[messageKey] || message.text;
-
+        
         // Проверяем наличие таблицы в отрендеренном HTML
-        const hasTable = renderedContent.includes("<table");
+        const hasTable = renderedContent.includes('<table');
 
         return (
           <Card
@@ -108,7 +105,7 @@ export function MessageConteiner({
               </div>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: renderedContent,
+                  __html: renderedContent
                 }}
                 className="markdown-body"
               />

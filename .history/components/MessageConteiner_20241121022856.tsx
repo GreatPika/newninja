@@ -1,4 +1,4 @@
-// components/MessageContainer.tsx
+// components/MessageConteiner.tsx
 import { Spinner, Card, CardBody, Button } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
+
+const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/;
 
 export function MessageConteiner({
   messages,
@@ -32,7 +34,7 @@ export function MessageConteiner({
       const rendered: Record<string, string> = {};
 
       for (const message of messages) {
-        const key = message.timestamp.toISOString();
+        const key = message.timestamp.toISOString(); // Убедитесь, что timestamp - Date
 
         rendered[key] = await marked(message.text);
       }
@@ -56,15 +58,18 @@ export function MessageConteiner({
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message: Message) => {
         const messageKey = message.timestamp.toISOString();
-        const renderedContent = renderedMessages[messageKey] || message.text;
 
-        // Проверяем наличие таблицы в отрендеренном HTML
-        const hasTable = renderedContent.includes("<table");
+        const hasTable = TABLE_REGEX.test(message.text);
+
+        // Reset lastIndex because test() advances it
+        TABLE_REGEX.lastIndex = 0;
 
         return (
           <Card
-            key={message.id ?? messageKey}
-            className={`${message.role === "user" ? "ml-auto" : "mr-auto"} max-w-full`}
+            key={message.id ?? messageKey} // Используем id, если доступен, иначе timestamp
+            className={`${
+              message.role === "user" ? "ml-auto" : "mr-auto"
+            } max-w-full`}
             shadow="sm"
           >
             <CardBody>
@@ -88,7 +93,7 @@ export function MessageConteiner({
                       radius="md"
                       size="sm"
                       variant="light"
-                      onClick={() => onCopyTableHandler(renderedContent)}
+                      onClick={() => onCopyTableHandler(message.text)}
                     >
                       <Copy size={16} />
                     </Button>
@@ -108,7 +113,7 @@ export function MessageConteiner({
               </div>
               <div
                 dangerouslySetInnerHTML={{
-                  __html: renderedContent,
+                  __html: renderedMessages[messageKey] || message.text,
                 }}
                 className="markdown-body"
               />

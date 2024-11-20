@@ -9,7 +9,7 @@ import { updateMessage } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
-  loading: () => <div className="text-default-500">Загрузка редактора...</div>,
+  loading: () => <div>Загрузка редактора...</div>,
 });
 
 export default function EditPage() {
@@ -42,12 +42,12 @@ export default function EditPage() {
   };
 
   if (!isEditorReady) {
-    return <div className="text-default-500">Загрузка...</div>;
+    return <div>Загрузка...</div>;
   }
 
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
+      <h1 className="text-2xl font-bold mb-4">Редактор</h1>
       <div>
         <Editor
           key={markdown}

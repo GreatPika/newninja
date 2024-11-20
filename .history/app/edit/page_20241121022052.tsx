@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 
 import { updateMessage } from "@/utils/indexedDB";
 
@@ -15,7 +16,14 @@ const Editor = dynamic(() => import("@/components/EditorComponent"), {
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
+  const { theme } = useTheme();
+
+  // Обработка гидратации и монтирования компонента
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const content = searchParams.get("content");
@@ -41,20 +49,26 @@ export default function EditPage() {
     }
   };
 
+  if (!mounted) {
+    return null;
+  }
+
   if (!isEditorReady) {
     return <div className="text-default-500">Загрузка...</div>;
   }
 
   return (
-    <>
-      <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
-      <div>
-        <Editor
-          key={markdown}
-          markdown={markdown}
-          onContentChange={handleContentChange}
-        />
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-black' : 'light bg-white'}`}>
+      <div className="container mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold mb-4 text-default-900">Редактор</h1>
+        <div>
+          <Editor
+            key={markdown}
+            markdown={markdown}
+            onContentChange={handleContentChange}
+          />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
