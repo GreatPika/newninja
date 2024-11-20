@@ -8,7 +8,7 @@ import {
   saveMessageToDB,
   deleteMessageFromDB,
 } from "@/utils/messages";
-import { getAssistantResponse } from "@/utils/apiVercel";
+import { getAssistantResponse } from "@/utils/messages";
 
 export function ChatContainer({ baseURL }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
