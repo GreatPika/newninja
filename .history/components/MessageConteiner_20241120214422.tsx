@@ -1,16 +1,17 @@
-// components/MessageConteiner.tsx
 import { Spinner, Card, CardBody, Button } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/github-markdown-custom.css";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback } from "react";
-import { Copy, Trash, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Copy, Trash, Edit } from "lucide-react";
 
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
 
 const TABLE_REGEX = /\|.*\|.*\n\|[-|\s]*\|[-|\s]*\|\n(\|.*\|.*\n)+/g;
+
+// Import the MarkdownModal component
+import MarkdownModal from "@/components/MarkdownModal"; // Adjust the import path as necessary
 
 export function MessageConteiner({
   messages,
@@ -21,7 +22,10 @@ export function MessageConteiner({
   const [renderedMessages, setRenderedMessages] = useState<
     Record<string, string>
   >({});
-  const router = useRouter();
+
+  // Add state to manage modal visibility and the message being edited
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<Message | null>(null);
 
   useEffect(() => {
     if (theme) {
@@ -34,7 +38,7 @@ export function MessageConteiner({
       const rendered: Record<string, string> = {};
 
       for (const message of messages) {
-        const key = message.timestamp.toISOString(); // Убедитесь, что timestamp - Date
+        const key = message.timestamp.toISOString();
 
         rendered[key] = await marked(message.text);
       }
@@ -48,23 +52,17 @@ export function MessageConteiner({
     handleCopyTable(messageText);
   }, []);
 
-  const handleEdit = (messageText: string) => {
-    router.push(`/edit?content=${encodeURIComponent(messageText)}`);
-  };
-
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message: Message) => {
         const messageKey = message.timestamp.toISOString();
-
         const hasTable = TABLE_REGEX.test(message.text);
 
-        // Reset lastIndex because test() advances it
         TABLE_REGEX.lastIndex = 0;
 
         return (
           <Card
-            key={message.id ?? messageKey} // Используем id, если доступен, иначе timestamp
+            key={message.id ?? messageKey}
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
             } max-w-full`}
@@ -76,25 +74,31 @@ export function MessageConteiner({
                   {message.role === "user" ? "Вы" : "TenderNinja"}
                 </span>
                 <div className="flex items-center">
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => handleEdit(message.text)}
-                  >
-                    <Pencil size={16} />
-                  </Button>
                   {hasTable && (
-                    <Button
-                      isIconOnly
-                      radius="md"
-                      size="sm"
-                      variant="light"
-                      onClick={() => onCopyTableHandler(message.text)}
-                    >
-                      <Copy size={16} />
-                    </Button>
+                    <>
+                      <Button
+                        isIconOnly
+                        radius="md"
+                        size="sm"
+                        variant="light"
+                        onClick={() => onCopyTableHandler(message.text)}
+                      >
+                        <Copy size={16} />
+                      </Button>
+                      <Button
+                        isIconOnly
+                        radius="md"
+                        size="sm"
+                        variant="light"
+                        // Add onClick handler to open the modal
+                        onClick={() => {
+                          setIsModalOpen(true);
+                          setEditingMessage(message);
+                        }}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                    </>
                   )}
                   {message.id !== undefined && (
                     <Button
@@ -131,6 +135,26 @@ export function MessageConteiner({
         </Card>
       )}
       <div className="h-16" />
+
+      {/* Render the MarkdownModal and pass necessary props */}
+      {editingMessage && (
+        <MarkdownModal
+          isOpen={isModalOpen}
+          onOpenChange={(isOpen) => {
+            setIsModalOpen(isOpen);
+            if (!isOpen) {
+              setEditingMessage(null);
+            }
+          }}
+          messageText={editingMessage.text}
+          onSave={(updatedText) => {
+            // Handle the save action here, e.g., update the message text
+            // You might need to update the messages state accordingly
+            setIsModalOpen(false);
+            setEditingMessage(null);
+          }}
+        />
+      )}
     </div>
   );
 }

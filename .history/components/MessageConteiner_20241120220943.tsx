@@ -4,8 +4,7 @@ import { marked } from "marked";
 import "@/github-markdown-custom.css";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback } from "react";
-import { Copy, Trash, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Copy, Trash } from "lucide-react";
 
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
@@ -21,7 +20,6 @@ export function MessageConteiner({
   const [renderedMessages, setRenderedMessages] = useState<
     Record<string, string>
   >({});
-  const router = useRouter();
 
   useEffect(() => {
     if (theme) {
@@ -48,10 +46,6 @@ export function MessageConteiner({
     handleCopyTable(messageText);
   }, []);
 
-  const handleEdit = (messageText: string) => {
-    router.push(`/edit?content=${encodeURIComponent(messageText)}`);
-  };
-
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message: Message) => {
@@ -76,15 +70,6 @@ export function MessageConteiner({
                   {message.role === "user" ? "Вы" : "TenderNinja"}
                 </span>
                 <div className="flex items-center">
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => handleEdit(message.text)}
-                  >
-                    <Pencil size={16} />
-                  </Button>
                   {hasTable && (
                     <Button
                       isIconOnly

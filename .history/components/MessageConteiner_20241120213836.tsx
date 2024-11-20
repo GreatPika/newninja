@@ -1,11 +1,10 @@
-// components/MessageConteiner.tsx
 import { Spinner, Card, CardBody, Button } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/github-markdown-custom.css";
 import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback } from "react";
-import { Copy, Trash, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Copy, Trash, Edit } from "lucide-react";
+import  MarkdownModal from "@/components/MarkdownModal";
 
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
@@ -18,10 +17,8 @@ export function MessageConteiner({
   onDelete,
 }: MessageConteinerProps) {
   const { theme } = useTheme();
-  const [renderedMessages, setRenderedMessages] = useState<
-    Record<string, string>
-  >({});
-  const router = useRouter();
+  const [renderedMessages, setRenderedMessages] = useState<Record<string, string>>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (theme) {
@@ -34,8 +31,7 @@ export function MessageConteiner({
       const rendered: Record<string, string> = {};
 
       for (const message of messages) {
-        const key = message.timestamp.toISOString(); // Убедитесь, что timestamp - Date
-
+        const key = message.timestamp.toISOString();
         rendered[key] = await marked(message.text);
       }
       setRenderedMessages(rendered);
@@ -48,23 +44,25 @@ export function MessageConteiner({
     handleCopyTable(messageText);
   }, []);
 
-  const handleEdit = (messageText: string) => {
-    router.push(`/edit?content=${encodeURIComponent(messageText)}`);
-  };
+  const handleModalOpen = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+
+  const handleModalClose = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message: Message) => {
         const messageKey = message.timestamp.toISOString();
-
         const hasTable = TABLE_REGEX.test(message.text);
 
-        // Reset lastIndex because test() advances it
         TABLE_REGEX.lastIndex = 0;
 
         return (
           <Card
-            key={message.id ?? messageKey} // Используем id, если доступен, иначе timestamp
+            key={message.id ?? messageKey}
             className={`${
               message.role === "user" ? "ml-auto" : "mr-auto"
             } max-w-full`}
@@ -76,25 +74,27 @@ export function MessageConteiner({
                   {message.role === "user" ? "Вы" : "TenderNinja"}
                 </span>
                 <div className="flex items-center">
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => handleEdit(message.text)}
-                  >
-                    <Pencil size={16} />
-                  </Button>
                   {hasTable && (
-                    <Button
-                      isIconOnly
-                      radius="md"
-                      size="sm"
-                      variant="light"
-                      onClick={() => onCopyTableHandler(message.text)}
-                    >
-                      <Copy size={16} />
-                    </Button>
+                    <>
+                      <Button
+                        isIconOnly
+                        radius="md"
+                        size="sm"
+                        variant="light"
+                        onClick={() => onCopyTableHandler(message.text)}
+                      >
+                        <Copy size={16} />
+                      </Button>
+                      <Button 
+                        isIconOnly 
+                        radius="md" 
+                        size="sm" 
+                        variant="light"
+                        onClick={handleModalOpen}
+                      >
+                        <Edit size={16} />
+                      </Button>
+                    </>
                   )}
                   {message.id !== undefined && (
                     <Button
@@ -131,6 +131,11 @@ export function MessageConteiner({
         </Card>
       )}
       <div className="h-16" />
+      
+      <MarkdownModal 
+        isOpen={isModalOpen}
+        onOpenChange={handleModalClose}
+      />
     </div>
   );
 }
