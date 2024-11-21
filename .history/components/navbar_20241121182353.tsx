@@ -13,8 +13,8 @@ import { ThemeSwitch } from "@/components/theme-switch";
 
 export const Navbar = () => {
   const pathname = usePathname();
-
-  if (pathname.startsWith("/edit/")) {
+  
+  if (pathname.startsWith('/edit/')) {
     return null;
   }
 
