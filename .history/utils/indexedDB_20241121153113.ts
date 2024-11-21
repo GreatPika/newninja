@@ -79,8 +79,6 @@ export const getMessageById = async (id: number) => {
   const db = await initializeDB();
   const tx = db.transaction(STORE_NAME, "readonly");
   const message = await tx.store.get(id);
-
   await tx.done;
-
   return message;
 };

@@ -3,9 +3,9 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 
-import { updateMessage } from "@/utils/indexedDB";
+import { updateMessage, getMessageById } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
@@ -15,25 +15,29 @@ const Editor = dynamic(() => import("@/components/EditorComponent"), {
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
-  const searchParams = useSearchParams();
+  const params = useParams();
+  const messageId =
+    typeof params.id === "string" ? parseInt(params.id, 10) : null;
 
   useEffect(() => {
-    const content = searchParams.get("content");
+    const fetchContent = async () => {
+      if (messageId) {
+        const message = await getMessageById(messageId);
 
-    if (content) {
-      const decodedContent = decodeURIComponent(content);
+        if (message) {
+          setMarkdown(message.text);
+          setIsEditorReady(true);
+        }
+      }
+    };
 
-      setMarkdown(decodedContent);
-      setIsEditorReady(true);
-    }
-  }, [searchParams]);
+    fetchContent();
+  }, [messageId]);
 
   const handleContentChange = async (content: string) => {
-    const messageId = searchParams.get("id");
-
     if (messageId) {
       try {
-        await updateMessage(parseInt(messageId), content);
+        await updateMessage(messageId, content);
         console.log("Изменения сохранены");
       } catch (error) {
         console.error("Ошибка при сохранении изменений:", error);
