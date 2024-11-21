@@ -14,12 +14,16 @@ import {
   thematicBreakPlugin,
   frontmatterPlugin,
   markdownShortcutPlugin,
-  StrikeThroughSupSubToggles,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
   BoldItalicUnderlineToggles,
+  BlockTypeSelect,
+  CreateLink,
+  InsertImage,
   InsertTable,
+  InsertThematicBreak,
+  ListsToggle,
 } from "@mdxeditor/editor";
 import { FC } from "react";
 import { useTheme } from "next-themes";
@@ -54,16 +58,6 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
         thematicBreakPlugin(),
         frontmatterPlugin(),
         markdownShortcutPlugin(),
-        toolbarPlugin({
-          toolbarContents: () => (
-            <>
-              <UndoRedo />
-              <BoldItalicUnderlineToggles />
-              <StrikeThroughSupSubToggles />
-              <InsertTable />
-            </>
-          ),
-        }),
       ]}
       onChange={(content) => {
         if (onContentChange) {

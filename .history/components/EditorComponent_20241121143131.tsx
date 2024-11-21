@@ -14,12 +14,16 @@ import {
   thematicBreakPlugin,
   frontmatterPlugin,
   markdownShortcutPlugin,
-  StrikeThroughSupSubToggles,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
   BoldItalicUnderlineToggles,
+  BlockTypeSelect,
+  CreateLink,
+  InsertImage,
   InsertTable,
+  InsertThematicBreak,
+  ListsToggle,
 } from "@mdxeditor/editor";
 import { FC } from "react";
 import { useTheme } from "next-themes";
@@ -44,23 +48,42 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
       className={getEditorClassName()}
       markdown={markdown || ""}
       plugins={[
-        headingsPlugin(),
         listsPlugin(),
+        headingsPlugin({
+          allowedHeadingLevels: [1, 2, 3, 4, 5, 6],
+        }),
         quotePlugin(),
-        linkPlugin(),
-        linkDialogPlugin(),
-        imagePlugin(),
-        tablePlugin(),
+        tablePlugin({
+          disableAutoSelect: true,
+        }),
         thematicBreakPlugin(),
         frontmatterPlugin(),
+        
+        linkPlugin({
+          disableAutoLink: false,
+        }),
+        linkDialogPlugin({
+          onClickLinkCallback: (url) => {
+            window.open(url, '_blank');
+          }
+        }),
+        imagePlugin({
+          disableImageResize: true,
+        }),
+        
         markdownShortcutPlugin(),
+        
         toolbarPlugin({
           toolbarContents: () => (
             <>
               <UndoRedo />
               <BoldItalicUnderlineToggles />
-              <StrikeThroughSupSubToggles />
+              <BlockTypeSelect />
+              <ListsToggle />
+              <CreateLink />
+              <InsertImage />
               <InsertTable />
+              <InsertThematicBreak />
             </>
           ),
         }),
@@ -69,6 +92,9 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
         if (onContentChange) {
           onContentChange(content);
         }
+      }}
+      onError={(error) => {
+        console.warn('MDXEditor error:', error);
       }}
     />
   );

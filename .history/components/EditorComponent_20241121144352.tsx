@@ -14,7 +14,6 @@ import {
   thematicBreakPlugin,
   frontmatterPlugin,
   markdownShortcutPlugin,
-  StrikeThroughSupSubToggles,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -59,7 +58,6 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
             <>
               <UndoRedo />
               <BoldItalicUnderlineToggles />
-              <StrikeThroughSupSubToggles />
               <InsertTable />
             </>
           ),
