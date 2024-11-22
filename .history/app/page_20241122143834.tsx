@@ -18,8 +18,9 @@ export default function Page() {
       <NextUIProvider>
         <div className="flex items-center justify-center w-full min-h-screen nextui-theme">
           <Card disableAnimation>
-            <CardBody className="overflow-hidden w-[343px]">
+            <CardBody className="overflow-hidden">
               <Tabs
+                disableAnimation
                 fullWidth
                 aria-label="Login options"
                 radius="full"

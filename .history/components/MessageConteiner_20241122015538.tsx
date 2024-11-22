@@ -121,7 +121,7 @@ export function MessageConteiner({
       })}
       {loading && (
         <div>
-          <Spinner size="md" />
+          <Spinner size="lg" />
         </div>
       )}
       <div className="h-16" />

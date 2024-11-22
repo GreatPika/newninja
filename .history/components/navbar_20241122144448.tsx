@@ -19,7 +19,7 @@ export const Navbar = () => {
   }
 
   return (
-    <NextUINavbar className="h-12 bg-transparent" maxWidth="full">
+    <NextUINavbar shouldHideOnScroll className="w-full">
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
