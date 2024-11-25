@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Message } from "@/types/index";
+import { Message, ApiResponse } from "@/types/index";
 import { supabase } from "@/utils/supabase";
 
 export async function getAssistantResponse(
@@ -59,11 +59,10 @@ export async function getAssistantResponse(
     }
 
     console.warn("No analysis in response");
-
     return null;
-  } catch (error) {
-    console.error("Ошибка в получении ответа от сервера:", error);
 
+  } catch (error) {
+    console.error("Error getting response:", error);
     return null;
   }
 }

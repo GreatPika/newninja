@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-import { Message } from "@/types/index";
+import { Message, ApiResponse } from "@/types/index";
 import { supabase } from "@/utils/supabase";
 
 export async function getAssistantResponse(
@@ -7,6 +6,7 @@ export async function getAssistantResponse(
   baseURL: string,
 ): Promise<Message | null> {
   try {
+    // Получаем текущую сессию пользователя
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -19,6 +19,7 @@ export async function getAssistantResponse(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        // Отправляем оба токена в заголовке
         Authorization: JSON.stringify({
           access_token: session.access_token,
           refresh_token: session.refresh_token,
@@ -28,27 +29,24 @@ export async function getAssistantResponse(
     });
 
     if (response.status === 401) {
+      // Попытка обновить сессию при ошибке авторизации
       const {
         data: { session: newSession },
       } = await supabase.auth.refreshSession();
 
       if (newSession) {
+        // Повторяем запрос с новым токеном
         return getAssistantResponse(text, baseURL);
       } else {
         throw new Error("Ошибка авторизации");
       }
     }
 
-    const data = await response.json();
-
-    // Проверяем наличие ошибки в ответе
-    if (data.error) {
-      return {
-        text: data.error, // Используем текст ошибки с сервера
-        role: "assistant",
-        timestamp: new Date(),
-      };
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    const data: ApiResponse = await response.json();
 
     if (data.analysis) {
       return {
@@ -62,7 +60,7 @@ export async function getAssistantResponse(
 
     return null;
   } catch (error) {
-    console.error("Ошибка в получении ответа от сервера:", error);
+    console.error("Error getting response:", error);
 
     return null;
   }

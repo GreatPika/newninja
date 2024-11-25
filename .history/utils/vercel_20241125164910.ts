@@ -62,7 +62,7 @@ export async function getAssistantResponse(
 
     return null;
   } catch (error) {
-    console.error("Ошибка в получении ответа от сервера:", error);
+    console.error("Error getting response:", error);
 
     return null;
   }
