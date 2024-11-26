@@ -19,8 +19,8 @@ export const Navbar = () => {
   }
 
   return (
-    <NextUINavbar
-      className="h-12 bg-transparent fixed top-0 left-0 right-0 z-50"
+    <NextUINavbar 
+      className="h-12 bg-transparent fixed top-0 left-0 right-0 z-50" 
       maxWidth="full"
     >
       <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
