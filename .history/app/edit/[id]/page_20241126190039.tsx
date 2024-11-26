@@ -22,10 +22,9 @@ export default function EditPage() {
   useEffect(() => {
     const fetchContent = async () => {
       if (!messageId) return;
-
+      
       try {
         const message = await getMessageById(messageId);
-
         if (message) {
           setMarkdown(message.text);
           setIsEditorReady(true);

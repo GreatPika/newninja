@@ -21,17 +21,13 @@ export default function EditPage() {
 
   useEffect(() => {
     const fetchContent = async () => {
-      if (!messageId) return;
-
-      try {
+      if (messageId) {
         const message = await getMessageById(messageId);
 
         if (message) {
           setMarkdown(message.text);
           setIsEditorReady(true);
         }
-      } catch (error) {
-        console.error("Ошибка при загрузке сообщения:", error);
       }
     };
 
