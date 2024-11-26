@@ -73,7 +73,7 @@ export async function getAssistantResponse(
       role: "assistant",
       timestamp: new Date(),
     };
-  } catch {
+  } catch (error) {
     // Возвращаем ошибку в виде сообщения от assistant
     return {
       text: "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.",

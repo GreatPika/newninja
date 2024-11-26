@@ -51,10 +51,9 @@ export async function getAssistantResponse(
 
     // Проверяем наличие ошибки в новом формате
     if (data.error) {
-      const { message } = data.error;
-
+      const { message, code } = data.error;
       return {
-        text: `Ошибка: ${message}`,
+        text: `Ошибка: ${message} (Код: ${code})`,
         role: "assistant",
         timestamp: new Date(),
       };
@@ -73,7 +72,7 @@ export async function getAssistantResponse(
       role: "assistant",
       timestamp: new Date(),
     };
-  } catch {
+  } catch (error) {
     // Возвращаем ошибку в виде сообщения от assistant
     return {
       text: "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.",

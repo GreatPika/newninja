@@ -4,7 +4,7 @@ import { supabase } from "@/utils/supabase";
 
 export async function getAssistantResponse(
   text: string,
-  baseURL: string,
+  baseURL: string
 ): Promise<Message | null> {
   try {
     const {
@@ -12,11 +12,7 @@ export async function getAssistantResponse(
     } = await supabase.auth.getSession();
 
     if (!session) {
-      return {
-        text: "Ошибка: пользователь не авторизован.",
-        role: "assistant",
-        timestamp: new Date(),
-      };
+      throw new Error("Не авторизован");
     }
 
     const response = await fetch(baseURL, {
@@ -29,6 +25,7 @@ export async function getAssistantResponse(
         }),
       },
       body: JSON.stringify({ text }),
+      credentials: "include", // Добавлено для поддержки CORS с учётными данными
     });
 
     if (response.status === 401) {
@@ -39,22 +36,35 @@ export async function getAssistantResponse(
       if (newSession) {
         return getAssistantResponse(text, baseURL);
       } else {
-        return {
-          text: "Ошибка: не удалось обновить сессию. Авторизация невозможна.",
-          role: "assistant",
-          timestamp: new Date(),
-        };
+        throw new Error("Ошибка авторизации");
       }
     }
 
-    const data = await response.json();
+    if (!response.body) {
+      throw new Error("Нет тела ответа");
+    }
 
-    // Проверяем наличие ошибки в новом формате
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let resultText = '';
+    let doneReading = false;
+
+    while (!doneReading) {
+      const { done, value } = await reader.read();
+      doneReading = done;
+      if (value) {
+        const chunk = decoder.decode(value);
+        resultText += chunk;
+        // Опционально: обновить UI с новыми данными
+        // updateUIWithNewData(resultText);
+      }
+    }
+
+    const data = JSON.parse(resultText);
+
     if (data.error) {
-      const { message } = data.error;
-
       return {
-        text: `Ошибка: ${message}`,
+        text: data.error,
         role: "assistant",
         timestamp: new Date(),
       };
@@ -68,17 +78,11 @@ export async function getAssistantResponse(
       };
     }
 
-    return {
-      text: "Ответ сервера не содержит анализа.",
-      role: "assistant",
-      timestamp: new Date(),
-    };
-  } catch {
-    // Возвращаем ошибку в виде сообщения от assistant
-    return {
-      text: "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.",
-      role: "assistant",
-      timestamp: new Date(),
-    };
+    console.warn("No analysis in response");
+
+    return null;
+  } catch (error) {
+    console.error("Ошибка в получении ответа от сервера:", error);
+    return null;
   }
 }

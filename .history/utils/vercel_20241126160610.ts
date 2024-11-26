@@ -12,11 +12,7 @@ export async function getAssistantResponse(
     } = await supabase.auth.getSession();
 
     if (!session) {
-      return {
-        text: "Ошибка: пользователь не авторизован.",
-        role: "assistant",
-        timestamp: new Date(),
-      };
+      throw new Error("Не авторизован");
     }
 
     const response = await fetch(baseURL, {
@@ -39,11 +35,7 @@ export async function getAssistantResponse(
       if (newSession) {
         return getAssistantResponse(text, baseURL);
       } else {
-        return {
-          text: "Ошибка: не удалось обновить сессию. Авторизация невозможна.",
-          role: "assistant",
-          timestamp: new Date(),
-        };
+        throw new Error("Ошибка авторизации");
       }
     }
 
@@ -51,13 +43,9 @@ export async function getAssistantResponse(
 
     // Проверяем наличие ошибки в новом формате
     if (data.error) {
-      const { message } = data.error;
-
-      return {
-        text: `Ошибка: ${message}`,
-        role: "assistant",
-        timestamp: new Date(),
-      };
+      const { message, code } = data.error;
+      console.error(`Ошибка с кодом ${code}: ${message}`);
+      throw new Error(`Ошибка: ${message} (Код: ${code})`);
     }
 
     if (data.analysis) {
@@ -68,17 +56,15 @@ export async function getAssistantResponse(
       };
     }
 
-    return {
-      text: "Ответ сервера не содержит анализа.",
-      role: "assistant",
-      timestamp: new Date(),
-    };
-  } catch {
-    // Возвращаем ошибку в виде сообщения от assistant
-    return {
-      text: "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.",
-      role: "assistant",
-      timestamp: new Date(),
-    };
+    console.warn("No analysis in response");
+
+    return null;
+  } catch (error) {
+    console.error("Ошибка в получении ответа от сервера:", error);
+
+    // Принудительно выбрасываем ошибку, чтобы приложение крашилось
+    throw new TypeError(
+      "renderedContent.includes is not a function",
+    );
   }
 }
