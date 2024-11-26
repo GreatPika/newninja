@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
-const NavbarContentComponent = () => {
+export const Navbar = () => {
   const pathname = usePathname();
 
   if (pathname.startsWith("/edit/")) {
@@ -42,5 +42,3 @@ const NavbarContentComponent = () => {
     </NextUINavbar>
   );
 };
-
-export default NavbarContentComponent;
