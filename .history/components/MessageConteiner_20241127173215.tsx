@@ -15,6 +15,8 @@ import { Copy, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
+import ConfirmationPopover from "./ConfirmationPopover";
+
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
 
@@ -29,6 +31,7 @@ export function MessageConteiner({
     Record<string, string>
   >({});
   const router = useRouter();
+  const [messageToDelete, setMessageToDelete] = useState<number | null>(null);
 
   useEffect(() => {
     if (theme) {
@@ -66,6 +69,21 @@ export function MessageConteiner({
     if (message.id) {
       router.push(`/edit/${message.id}`);
     }
+  };
+
+  const handleDeleteClick = (messageId: number) => {
+    setMessageToDelete(messageId);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (messageToDelete) {
+      onDelete(messageToDelete);
+      setMessageToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setMessageToDelete(null);
   };
 
   return (
@@ -129,15 +147,23 @@ export function MessageConteiner({
                   </Button>
                 )}
                 {message.id !== undefined && (
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => onDelete(message.id)}
+                  <ConfirmationPopover
+                    isOpen={messageToDelete === message.id}
+                    message="Вы уверены, что хотите удалить это сообщение?"
+                    title="Удаление сообщения"
+                    onClose={handleDeleteCancel}
+                    onConfirm={handleDeleteConfirm}
                   >
-                    <Trash size={16} />
-                  </Button>
+                    <Button
+                      isIconOnly
+                      radius="md"
+                      size="sm"
+                      variant="light"
+                      onClick={() => handleDeleteClick(message.id!)}
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  </ConfirmationPopover>
                 )}
               </div>
             </CardFooter>

@@ -13,7 +13,6 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, useCallback } from "react";
 import { Copy, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSnackbar } from "notistack";
 
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
@@ -24,7 +23,6 @@ export function MessageConteiner({
   onDelete,
 }: MessageConteinerProps) {
   const { theme } = useTheme();
-  const { enqueueSnackbar } = useSnackbar();
   const [renderedMessages, setRenderedMessages] = useState<
     Record<string, string>
   >({});
@@ -51,16 +49,9 @@ export function MessageConteiner({
     renderMessages();
   }, [messages]);
 
-  const onCopyTableHandler = useCallback(
-    (messageText: string) => {
-      handleCopyTable(messageText);
-      enqueueSnackbar("Таблица скопирована в буфер обмена", {
-        variant: "success",
-        autoHideDuration: 2000,
-      });
-    },
-    [enqueueSnackbar],
-  );
+  const onCopyTableHandler = useCallback((messageText: string) => {
+    handleCopyTable(messageText);
+  }, []);
 
   const handleEdit = (message: Message) => {
     if (message.id) {

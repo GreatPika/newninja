@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 import { Message } from "@/types/index";
 import { supabase } from "@/utils/supabase";
+import { useSnackbar } from 'notistack';
 
 export async function getAssistantResponse(
   text: string,
   baseURL: string,
-  enqueueSnackbar: (message: string, options: any) => void,
+  enqueueSnackbar: (message: string, options: any) => void
 ): Promise<Message | null> {
   try {
     const {
@@ -13,10 +14,7 @@ export async function getAssistantResponse(
     } = await supabase.auth.getSession();
 
     if (!session) {
-      enqueueSnackbar("Ошибка: пользователь не авторизован.", {
-        variant: "error",
-      });
-
+      enqueueSnackbar("Ошибка: пользователь не авторизован.", { variant: 'error' });
       return null;
     }
 
@@ -40,11 +38,7 @@ export async function getAssistantResponse(
       if (newSession) {
         return getAssistantResponse(text, baseURL, enqueueSnackbar);
       } else {
-        enqueueSnackbar(
-          "Ошибка: не удалось обновить сессию. Авторизация невозможна.",
-          { variant: "error" },
-        );
-
+        enqueueSnackbar("Ошибка: не удалось обновить сессию. Авторизация невозможна.", { variant: 'error' });
         return null;
       }
     }
@@ -53,9 +47,7 @@ export async function getAssistantResponse(
 
     if (data.error) {
       const { message } = data.error;
-
-      enqueueSnackbar(`Ошибка: ${message}`, { variant: "error" });
-
+      enqueueSnackbar(`Ошибка: ${message}`, { variant: 'error' });
       return null;
     }
 
@@ -67,15 +59,10 @@ export async function getAssistantResponse(
       };
     }
 
-    enqueueSnackbar("Ответ сервера пуст", { variant: "error" });
-
+    enqueueSnackbar("Ответ сервера пуст", { variant: 'error' });
     return null;
   } catch {
-    enqueueSnackbar(
-      "Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.",
-      { variant: "error" },
-    );
-
+    enqueueSnackbar("Произошла ошибка при обработке запроса. Пожалуйста, попробуйте еще раз.", { variant: 'error' });
     return null;
   }
 }

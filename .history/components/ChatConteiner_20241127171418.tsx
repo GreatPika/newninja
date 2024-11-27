@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useSnackbar } from "notistack";
+import { useSnackbar } from 'notistack';
 
 import { PromptInput } from "@/components/PromptInput";
 import { MessageConteiner } from "@/components/MessageConteiner";
@@ -45,11 +45,7 @@ export function ChatContainer({ baseURL }: ChatContainerProps) {
         ),
       );
 
-      const assistantMessage = await getAssistantResponse(
-        text,
-        baseURL,
-        enqueueSnackbar,
-      );
+      const assistantMessage = await getAssistantResponse(text, baseURL, enqueueSnackbar);
 
       if (assistantMessage) {
         setMessages((prev) => [...prev, assistantMessage]);
