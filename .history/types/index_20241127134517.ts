@@ -16,7 +16,7 @@ export interface ApiResponse {
 export interface Message {
   id?: number;
   text: string;
-  role: "user" | string;
+  role: string;
   timestamp: Date;
 }
 

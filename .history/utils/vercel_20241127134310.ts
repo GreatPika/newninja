@@ -63,7 +63,7 @@ export async function getAssistantResponse(
     if (data.analysis) {
       return {
         text: data.analysis,
-        role: data.product_name || "assistant",
+        role: data.product_name,
         timestamp: new Date(),
       };
     }
