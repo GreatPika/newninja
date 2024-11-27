@@ -26,7 +26,7 @@ export async function signUp(email: string, password: string) {
     email: email,
     password: password,
     options: {
-      emailRedirectTo: "https://www.tenderninja.co/", // Укажите URL редиректа
+      emailRedirectTo: 'https://www.tenderninja.co/', // Укажите URL редиректа
     },
   });
 
@@ -34,6 +34,7 @@ export async function signUp(email: string, password: string) {
 
   return data;
 }
+
 
 export async function signOut() {
   const { error } = await supabase.auth.signOut();
