@@ -226,7 +226,7 @@ module.exports = {
             },
             foreground: "#dddddd",
             primary: {
-              DEFAULT: "#D18A0C",
+              DEFAULT: "#F5A524",
             },
             secondary: {
               DEFAULT: "#7828C8",

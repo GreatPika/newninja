@@ -101,6 +101,6 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
   color: var(--baseText);
-  --basePageBg: rgb(20, 20, 20);
+  --basePageBg: rgb(152, 60, 60);
   background: var(--basePageBg);
 }
