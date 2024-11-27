@@ -87,15 +87,15 @@ export function MessageConteiner({
             </CardBody>
             <CardFooter className="flex justify-between items-center">
               <div className="text-xs">
-                {message.timestamp.toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "long",
+                {message.timestamp.toLocaleDateString('ru-RU', {
+                  day: 'numeric',
+                  month: 'long'
                 })}
-                {", "}
-                {message.timestamp.toLocaleTimeString("ru-RU", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
+                {', '}
+                {message.timestamp.toLocaleTimeString('ru-RU', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: false
                 })}
               </div>
               <div className="flex items-center">

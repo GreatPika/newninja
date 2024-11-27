@@ -1,12 +1,5 @@
 // components/MessageContainer.tsx
-import {
-  Spinner,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Button,
-} from "@nextui-org/react";
+import { Spinner, Card, CardBody, Button } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
 import { useTheme } from "next-themes";
@@ -64,6 +57,8 @@ export function MessageConteiner({
       {messages.map((message: Message) => {
         const messageKey = message.timestamp.toISOString();
         const renderedContent = renderedMessages[messageKey] || message.text;
+
+        // Проверяем наличие таблицы в отрендеренном HTML
         const hasTable = renderedContent.includes("<table");
 
         return (
@@ -72,66 +67,55 @@ export function MessageConteiner({
             className={`${message.role === "user" ? "ml-auto" : "mr-auto"} max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="flex justify-between items-center">
-              <span className="text-md font-semibold mt-2">
-                {message.role === "user" ? "Вы" : message.role}
-              </span>
-            </CardHeader>
             <CardBody>
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-md font-semibold">
+                  {message.role === "user" ? "Вы" : message.role}
+                </span>
+                <div className="flex items-center">
+                  <Button
+                    isIconOnly
+                    radius="md"
+                    size="sm"
+                    variant="light"
+                    onClick={() => handleEdit(message)}
+                  >
+                    <Pencil size={16} />
+                  </Button>
+                  {hasTable && (
+                    <Button
+                      isIconOnly
+                      radius="md"
+                      size="sm"
+                      variant="light"
+                      onClick={() => onCopyTableHandler(renderedContent)}
+                    >
+                      <Copy size={16} />
+                    </Button>
+                  )}
+                  {message.id !== undefined && (
+                    <Button
+                      isIconOnly
+                      radius="md"
+                      size="sm"
+                      variant="light"
+                      onClick={() => onDelete(message.id)}
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  )}
+                </div>
+              </div>
               <div
                 dangerouslySetInnerHTML={{
                   __html: renderedContent,
                 }}
                 className="markdown-body"
               />
+              <div className="text-xs text-gray-500 mt-2">
+                {message.timestamp.toLocaleTimeString()}
+              </div>
             </CardBody>
-            <CardFooter className="flex justify-between items-center">
-              <div className="text-xs">
-                {message.timestamp.toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "long",
-                })}
-                {", "}
-                {message.timestamp.toLocaleTimeString("ru-RU", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
-              </div>
-              <div className="flex items-center">
-                <Button
-                  isIconOnly
-                  radius="md"
-                  size="sm"
-                  variant="light"
-                  onClick={() => handleEdit(message)}
-                >
-                  <Pencil size={16} />
-                </Button>
-                {hasTable && (
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => onCopyTableHandler(renderedContent)}
-                  >
-                    <Copy size={16} />
-                  </Button>
-                )}
-                {message.id !== undefined && (
-                  <Button
-                    isIconOnly
-                    radius="md"
-                    size="sm"
-                    variant="light"
-                    onClick={() => onDelete(message.id)}
-                  >
-                    <Trash size={16} />
-                  </Button>
-                )}
-              </div>
-            </CardFooter>
           </Card>
         );
       })}

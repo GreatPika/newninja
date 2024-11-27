@@ -1,12 +1,5 @@
 // components/MessageContainer.tsx
-import {
-  Spinner,
-  Card,
-  CardBody,
-  CardHeader,
-  CardFooter,
-  Button,
-} from "@nextui-org/react";
+import { Spinner, Card, CardBody, CardHeader, CardFooter, Button } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
 import { useTheme } from "next-themes";
@@ -72,8 +65,8 @@ export function MessageConteiner({
             className={`${message.role === "user" ? "ml-auto" : "mr-auto"} max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="flex justify-between items-center">
-              <span className="text-md font-semibold mt-2">
+            <CardHeader className="flex justify-between items-center px-4 py-2">
+              <span className="text-md font-semibold">
                 {message.role === "user" ? "Вы" : message.role}
               </span>
             </CardHeader>
@@ -85,18 +78,9 @@ export function MessageConteiner({
                 className="markdown-body"
               />
             </CardBody>
-            <CardFooter className="flex justify-between items-center">
-              <div className="text-xs">
-                {message.timestamp.toLocaleDateString("ru-RU", {
-                  day: "numeric",
-                  month: "long",
-                })}
-                {", "}
-                {message.timestamp.toLocaleTimeString("ru-RU", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
+            <CardFooter className="px-4 py-2 flex justify-between items-center">
+              <div className="text-xs text-gray-500">
+                {message.timestamp.toLocaleTimeString()}
               </div>
               <div className="flex items-center">
                 <Button
