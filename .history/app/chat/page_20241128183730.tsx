@@ -16,7 +16,7 @@ export default function HomePage() {
       <div className="h-full">
         <Navbar />
         <ChatContainer
-          baseURL="https://tenderless-vercel.vercel.app/"
+          baseURL="https://tenderless-vercel-sergei-rogov.vercel.app"
           emptyStateMessage={emptyStateMessage}
         />
       </div>
