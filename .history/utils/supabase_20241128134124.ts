@@ -53,12 +53,7 @@ export async function getUserProfile(userId: string) {
   return data;
 }
 
-interface TokenUsageData {
-  created_at: string;
-  total_cost: number;
-}
-
-export async function getTokenUsage(userId: string): Promise<TokenUsageData[]> {
+export async function getTokenUsage(userId: string) {
   const { data, error } = await supabase
     .from("token_usage")
     .select("created_at, total_cost")

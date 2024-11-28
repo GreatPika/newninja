@@ -52,20 +52,3 @@ export async function getUserProfile(userId: string) {
 
   return data;
 }
-
-interface TokenUsageData {
-  created_at: string;
-  total_cost: number;
-}
-
-export async function getTokenUsage(userId: string): Promise<TokenUsageData[]> {
-  const { data, error } = await supabase
-    .from("token_usage")
-    .select("created_at, total_cost")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-
-  return data;
-}

@@ -8,31 +8,17 @@ import {
 } from "@nextui-org/navbar";
 import NextLink from "next/link";
 import { Button } from "@nextui-org/button";
-import { Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
 export const Navbar = () => {
-  const router = useRouter();
-
-  const userButton = (
-    <Button
-      isIconOnly
-      radius="md"
-      variant="light"
-      onClick={() => router.push("/settings")}
-    >
-      <Settings size={22} strokeWidth={1.5} />
-    </Button>
-  );
-
   return (
     <NextUINavbar
       className="h-12 bg-transparent fixed top-0 left-0 right-0 z-50"
       maxWidth="full"
     >
-      <NavbarContent justify="start">
+      <NavbarContent className="basis-1/5 sm:basis-full" justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
             <p className="font-bold text-inherit">Tender Ninja</p>
@@ -40,12 +26,32 @@ export const Navbar = () => {
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="gap-2" justify="end">
-        <div className="flex">
-          <ThemeSwitch />
-          {userButton}
-        </div>
-        <NavbarMenuToggle className="sm:hidden" />
+      <NavbarContent
+        className="hidden sm:flex basis-1/5 sm:basis-full"
+        justify="end"
+      >
+        <Button
+          isIconOnly
+          radius="md"
+          size="sm"
+          variant="light"
+        >
+          <User size={20} />
+        </Button>
+        <ThemeSwitch />
+      </NavbarContent>
+
+      <NavbarContent className="sm:hidden basis-1 pl-4" justify="end">
+        <Button
+          isIconOnly
+          radius="md"
+          size="sm"
+          variant="light"
+        >
+          <User size={20} />
+        </Button>
+        <ThemeSwitch />
+        <NavbarMenuToggle />
       </NavbarContent>
     </NextUINavbar>
   );

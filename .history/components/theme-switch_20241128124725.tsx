@@ -19,16 +19,12 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
   return (
     <Button
       isIconOnly
-      className={className}
-      radius="lg"
+      radius="md"
+      size="sm"
       variant="light"
       onClick={toggleTheme}
     >
-      {theme === "light" ? (
-        <Sun size={22} strokeWidth={1.5} />
-      ) : (
-        <Moon size={22} strokeWidth={1.5} />
-      )}
+      {theme === "light" ? <Sun size={22} /> : <Moon size={22} />}
     </Button>
   );
 };

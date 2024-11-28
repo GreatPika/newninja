@@ -8,22 +8,14 @@ import {
 } from "@nextui-org/navbar";
 import NextLink from "next/link";
 import { Button } from "@nextui-org/button";
-import { Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { User } from "lucide-react";
 
 import { ThemeSwitch } from "@/components/theme-switch";
 
 export const Navbar = () => {
-  const router = useRouter();
-
   const userButton = (
-    <Button
-      isIconOnly
-      radius="md"
-      variant="light"
-      onClick={() => router.push("/settings")}
-    >
-      <Settings size={22} strokeWidth={1.5} />
+    <Button isIconOnly radius="md" variant="light">
+      <User size={20} />
     </Button>
   );
 
@@ -40,7 +32,7 @@ export const Navbar = () => {
         </NavbarBrand>
       </NavbarContent>
 
-      <NavbarContent className="gap-2" justify="end">
+      <NavbarContent justify="end" className="gap-2">
         <div className="flex">
           <ThemeSwitch />
           {userButton}

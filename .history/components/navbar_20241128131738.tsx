@@ -23,7 +23,7 @@ export const Navbar = () => {
       variant="light"
       onClick={() => router.push("/settings")}
     >
-      <Settings size={22} strokeWidth={1.5} />
+      <Settings size={22} strokeWidth={1} />
     </Button>
   );
 
