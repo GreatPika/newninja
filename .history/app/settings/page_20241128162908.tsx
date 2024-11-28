@@ -91,7 +91,7 @@ export default function SettingsPage() {
       <Card>
         <CardBody>
           <div className="flex justify-between items-center">
-            <div className="text-lg font-semibold">
+            <div className="text-lg font-medium">
               Баланс: ${userProfile?.balance?.toFixed(2) || "0.00"}
             </div>
             <Button
