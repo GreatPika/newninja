@@ -70,20 +70,6 @@ export default function SettingsPage() {
         <CardBody>
           <div className="flex justify-between items-center">
             <div className="text-lg font-bold">{userProfile?.email}</div>
-            <Button
-              color="danger"
-              variant="light"
-              onClick={async () => {
-                try {
-                  await signOut();
-                  window.location.href = "/";
-                } catch (error) {
-                  console.error("Ошибка при выходе:", error);
-                }
-              }}
-            >
-              Выйти из аккаунта
-            </Button>
           </div>
         </CardBody>
       </Card>
@@ -129,6 +115,27 @@ export default function SettingsPage() {
           )}
         </TableBody>
       </Table>
+
+      <Card>
+        <CardBody>
+          <div className="flex justify-between items-center">
+            <Button
+              className="w-full"
+              color="danger"
+              onClick={async () => {
+                try {
+                  await signOut();
+                  window.location.href = "/";
+                } catch (error) {
+                  console.error("Ошибка при выходе:", error);
+                }
+              }}
+            >
+              Выйти из аккаунта
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
     </div>
   );
 }

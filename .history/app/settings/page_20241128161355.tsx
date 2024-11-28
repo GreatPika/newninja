@@ -72,7 +72,6 @@ export default function SettingsPage() {
             <div className="text-lg font-bold">{userProfile?.email}</div>
             <Button
               color="danger"
-              variant="light"
               onClick={async () => {
                 try {
                   await signOut();

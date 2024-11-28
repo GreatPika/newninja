@@ -1,10 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { Card, CardBody } from "@nextui-org/react";
 
 import { PromptInput } from "@/components/PromptInput";
 import { MessageConteiner } from "@/components/MessageConteiner";
-import { Message } from "@/types/index";
+import { Message, } from "@/types/index";
 import {
   loadMessagesFromDB,
   saveMessageToDB,
@@ -17,10 +16,7 @@ interface ChatContainerProps {
   emptyStateMessage?: string;
 }
 
-export function ChatContainer({
-  baseURL,
-  emptyStateMessage,
-}: ChatContainerProps) {
+export function ChatContainer({ baseURL, emptyStateMessage }: ChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -87,13 +83,9 @@ export function ChatContainer({
       <div className="w-[800px] mx-auto flex flex-col bg-background flex-grow pb-20">
         {messages.length === 0 && emptyStateMessage ? (
           <div className="flex items-center justify-center flex-grow">
-            <Card>
-              <CardBody>
-                <p className="text-left text-foreground/80 whitespace-pre-line">
-                  {emptyStateMessage}
-                </p>
-              </CardBody>
-            </Card>
+            <p className="text-center text-muted-foreground max-w-[600px] mx-auto px-4">
+              {emptyStateMessage}
+            </p>
           </div>
         ) : (
           <MessageConteiner

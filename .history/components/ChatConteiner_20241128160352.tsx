@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { Card, CardBody } from "@nextui-org/react";
 
 import { PromptInput } from "@/components/PromptInput";
 import { MessageConteiner } from "@/components/MessageConteiner";
@@ -87,13 +86,11 @@ export function ChatContainer({
       <div className="w-[800px] mx-auto flex flex-col bg-background flex-grow pb-20">
         {messages.length === 0 && emptyStateMessage ? (
           <div className="flex items-center justify-center flex-grow">
-            <Card>
-              <CardBody>
-                <p className="text-left text-foreground/80 whitespace-pre-line">
-                  {emptyStateMessage}
-                </p>
-              </CardBody>
-            </Card>
+            <div className="flex items-start gap-4 border border-foreground/80 rounded-2xl p-4 max-w-[800px] mx-auto">
+              <p className="text-left text-foreground/80 whitespace-pre-line">
+                {emptyStateMessage}
+              </p>
+            </div>
           </div>
         ) : (
           <MessageConteiner
