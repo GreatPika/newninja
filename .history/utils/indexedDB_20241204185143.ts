@@ -1,25 +1,33 @@
 // utils/indexedDB.ts
 import { openDB, IDBPDatabase } from "idb";
 
-import { MessageDB } from "@/types/index";
+export interface MessageDB {
+  id?: number; // Автоинкрементный ключ
+  text: string;
+  role: string;
+  timestamp: string; // Хранение как строка ISO
+}
 
 const DB_NAME = "ChatDB";
 const STORE_NAME = "messages";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<MessageDB>>;
 
 export const initializeDB = async () => {
   if (!dbPromise) {
     dbPromise = openDB<MessageDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
           const store = db.createObjectStore(STORE_NAME, {
             keyPath: "id",
             autoIncrement: true,
           });
 
           store.createIndex("timestamp", "timestamp");
+        }
+        if (oldVersion === 1) {
+          const store = db.transaction(STORE_NAME).objectStore(STORE_NAME);
         }
       },
     });

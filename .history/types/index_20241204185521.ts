@@ -23,7 +23,7 @@ export interface Message {
 export interface MessageDB {
   id?: number; // Автоинкрементный ключ
   text: string;
-  role: string;
+  role: "user" | "assistant";
   timestamp: string; // Хранение как строка ISO
 }
 export interface ChatContainerProps {
@@ -34,6 +34,13 @@ export interface MessageConteinerProps {
   messages: Message[];
   loading: boolean;
   onDelete: (id?: number) => void;
+}
+
+export interface MessageDB {
+  id?: number;
+  text: string;
+  role: "user" | "assistant";
+  timestamp: string;
 }
 
 export interface TokenUsageData {

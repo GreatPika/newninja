@@ -29,7 +29,7 @@ export async function saveMessageToDB(
   try {
     return await dbAddMessage({
       text: message.text,
-      role: message.role,
+      role: message.role === "user" ? "user" : message.role,
       timestamp: message.timestamp.toISOString(),
     });
   } catch (error) {

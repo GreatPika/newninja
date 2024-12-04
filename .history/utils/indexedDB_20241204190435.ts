@@ -1,7 +1,12 @@
 // utils/indexedDB.ts
 import { openDB, IDBPDatabase } from "idb";
 
-import { MessageDB } from "@/types/index";
+export interface MessageDB {
+  id?: number; // Автоинкрементный ключ
+  text: string;
+  role: string; // Изменено с "user" | "assistant" на string
+  timestamp: string; // Хранение как строка ISO
+}
 
 const DB_NAME = "ChatDB";
 const STORE_NAME = "messages";
