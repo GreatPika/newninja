@@ -64,12 +64,12 @@ export default function SettingsPage() {
   }, [setIsLoading, setTokenData, setHasMore]);
 
   return (
-    <div className="container mx-auto flex justify-center gap-4 pt-4">
-      <div className="flex flex-col gap-4" style={{ width: "25rem" }}>
+    <div className="container mx-auto flex gap-4">
+      <div className="flex flex-col gap-4" style={{ width: '25rem' }}>
         <UserCard email={userProfile?.email} />
-      </div>
-      <div className="flex flex-col gap-4" style={{ width: "25rem" }}>
         <BalanceCard balance={userProfile?.balance} />
+      </div>
+      <div className="flex flex-col gap-4" style={{ width: '25rem' }}>
         <TokenUsageTable
           hasMore={hasMore}
           isLoading={isLoading}

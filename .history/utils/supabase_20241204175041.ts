@@ -54,24 +54,21 @@ export async function getUserProfile(userId: string) {
 }
 
 interface TokenUsageData {
-  id: number;
   created_at: string;
   total_cost: number;
 }
 
-export async function getTokenUsageWithPagination(
-  userId: string,
-  start: number,
-  end: number,
-): Promise<TokenUsageData[]> {
+export async function getTokenUsage(userId: string, page = 1) {
+  const pageSize = 10;
+  const start = (page - 1) * pageSize;
+  
   const { data, error } = await supabase
-    .from("token_usage")
-    .select("id, created_at, total_cost")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .range(start, end);
+    .from('token_usage')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .range(start, start + pageSize - 1);
 
   if (error) throw error;
-
   return data;
 }

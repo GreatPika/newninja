@@ -2,7 +2,7 @@
 
 import { ChatContainer } from "@/app/chat/components/ChatConteiner";
 import AuthGuard from "@/components/AuthGuard";
-import { NavBar } from "@/app/chat/components/NavBar";
+import { NavBar } from "@/app/chat/components/navbar";
 
 export default function HomePage() {
   const emptyStateMessage =

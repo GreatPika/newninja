@@ -2,7 +2,7 @@
 
 import { ChatContainer } from "@/app/chat/components/ChatConteiner";
 import AuthGuard from "@/components/AuthGuard";
-import { NavBar } from "@/app/chat/components/NavBar";
+import { Navbar } from "@/app/chat/components/navbar";
 
 export default function HomePage() {
   const emptyStateMessage =
@@ -14,7 +14,7 @@ export default function HomePage() {
   return (
     <AuthGuard>
       <div className="h-full">
-        <NavBar />
+        <Navbar />
         <ChatContainer
           baseURL="https://api.tenderninja.co"
           emptyStateMessage={emptyStateMessage}
