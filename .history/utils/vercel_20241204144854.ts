@@ -8,7 +8,6 @@ export async function getAssistantResponse(
   enqueueSnackbar: (message: string, options: any) => void,
 ): Promise<Message | null> {
   let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-  let buffer = ""; // Добавляем буфер для хранения неполных данных
 
   try {
     const {
@@ -71,17 +70,15 @@ export async function getAssistantResponse(
       if (done) break;
 
       const chunk = decoder.decode(value, { stream: true });
-
-      buffer += chunk; // Добавляем данные в буфер
-
-      const lines = buffer.split("\n");
-
-      buffer = lines.pop() || ""; // Сохраняем последнюю (возможно, неполную) строку обратно в буфер
+      const lines = chunk.split("\n").filter((line) => line.trim() !== "");
 
       for (const line of lines) {
         if (line.startsWith("data:")) {
           try {
-            const data = JSON.parse(line.substring(5));
+            // Убираем "data:" и декодируем строку
+            const jsonString = line.substring(5).trim();
+            const normalizedString = jsonString.replace(/\\u/g, "\\\\u"); // Исправляем некорректные экранирования
+            const data = JSON.parse(normalizedString); // Парсим JSON
 
             if (data.type === "status") {
               enqueueSnackbar(data.message, { variant: "info" });
@@ -94,29 +91,9 @@ export async function getAssistantResponse(
               productName = data.data.product_name || "assistant";
             }
           } catch (e) {
-            console.error("Ошибка при разборе JSON:", e);
+            console.error("Ошибка при разборе JSON:", e, line); // Логируем проблемную строку
           }
         }
-      }
-    }
-
-    // Обрабатываем оставшиеся данные в буфере
-    if (buffer?.startsWith("data:")) {
-      try {
-        const data = JSON.parse(buffer.substring(5));
-
-        if (data.type === "status") {
-          enqueueSnackbar(data.message, { variant: "info" });
-        } else if (data.type === "error") {
-          enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
-
-          return null;
-        } else if (data.type === "result") {
-          analysis = data.data.analysis;
-          productName = data.data.product_name || "assistant";
-        }
-      } catch (e) {
-        console.error("Ошибка при разборе JSON:", e);
       }
     }
 

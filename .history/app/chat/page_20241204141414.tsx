@@ -16,7 +16,7 @@ export default function HomePage() {
       <div className="h-full">
         <Navbar />
         <ChatContainer
-          baseURL="http://65.109.172.63:8000"
+          baseURL="http://65.109.172.63:8000/"
           emptyStateMessage={emptyStateMessage}
         />
       </div>

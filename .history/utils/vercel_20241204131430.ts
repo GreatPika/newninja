@@ -7,9 +7,6 @@ export async function getAssistantResponse(
   baseURL: string,
   enqueueSnackbar: (message: string, options: any) => void,
 ): Promise<Message | null> {
-  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-  let buffer = ""; // Добавляем буфер для хранения неполных данных
-
   try {
     const {
       data: { session },
@@ -52,71 +49,32 @@ export async function getAssistantResponse(
       }
     }
 
-    if (!response.body) {
-      enqueueSnackbar("Ошибка: не удалось получить тело ответа", {
-        variant: "error",
-      });
-
-      return null;
-    }
-
-    reader = response.body.getReader();
+    const reader = response.body?.getReader();
     const decoder = new TextDecoder("utf-8");
     let analysis = "";
     let productName = "assistant";
 
     while (true) {
       const { done, value } = await reader.read();
-
       if (done) break;
 
       const chunk = decoder.decode(value, { stream: true });
-
-      buffer += chunk; // Добавляем данные в буфер
-
-      const lines = buffer.split("\n");
-
-      buffer = lines.pop() || ""; // Сохраняем последнюю (возможно, неполную) строку обратно в буфер
+      const lines = chunk.split("\n").filter(line => line.trim() !== "");
 
       for (const line of lines) {
         if (line.startsWith("data:")) {
-          try {
-            const data = JSON.parse(line.substring(5));
+          const data = JSON.parse(line.substring(5));
 
-            if (data.type === "status") {
-              enqueueSnackbar(data.message, { variant: "info" });
-            } else if (data.type === "error") {
-              enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
-
-              return null;
-            } else if (data.type === "result") {
-              analysis = data.data.analysis;
-              productName = data.data.product_name || "assistant";
-            }
-          } catch (e) {
-            console.error("Ошибка при разборе JSON:", e);
+          if (data.type === "status") {
+            enqueueSnackbar(data.message, { variant: "info" });
+          } else if (data.type === "error") {
+            enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
+            return null;
+          } else if (data.type === "result") {
+            analysis = data.data.analysis;
+            productName = data.data.product_name || "assistant";
           }
         }
-      }
-    }
-
-    // Обрабатываем оставшиеся данные в буфере
-    if (buffer?.startsWith("data:")) {
-      try {
-        const data = JSON.parse(buffer.substring(5));
-
-        if (data.type === "status") {
-          enqueueSnackbar(data.message, { variant: "info" });
-        } else if (data.type === "error") {
-          enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
-
-          return null;
-        } else if (data.type === "result") {
-          analysis = data.data.analysis;
-          productName = data.data.product_name || "assistant";
-        }
-      } catch (e) {
-        console.error("Ошибка при разборе JSON:", e);
       }
     }
 
@@ -139,14 +97,5 @@ export async function getAssistantResponse(
     );
 
     return null;
-  } finally {
-    // Убедимся, что reader закрыт
-    try {
-      if (reader) {
-        reader.releaseLock();
-      }
-    } catch (e) {
-      console.error("Ошибка при освобождении reader:", e);
-    }
   }
 }
