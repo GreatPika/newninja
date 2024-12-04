@@ -39,16 +39,16 @@ export function TokenUsageTable({
         ) : null
       }
       classNames={{
-        base: "max-h-[32rem]",
-        table: "min-h-[26rem]",
+        base: "max-h-[520px]",
+        table: "min-h-[420px]",
       }}
       shadow="none"
     >
       <TableHeader>
-        <TableColumn key="created_at" className="text-sm">
+        <TableColumn key="created_at" className="text-md">
           Дата
         </TableColumn>
-        <TableColumn key="total_cost" className="text-sm">
+        <TableColumn key="total_cost" className="text-md">
           Расходы, $
         </TableColumn>
       </TableHeader>

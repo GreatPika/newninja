@@ -39,8 +39,8 @@ export function TokenUsageTable({
         ) : null
       }
       classNames={{
-        base: "max-h-[32rem]",
-        table: "min-h-[26rem]",
+        base: "max-h-[32.5rem]",
+        table: "min-h-[26.25rem]",
       }}
       shadow="none"
     >
