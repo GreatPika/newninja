@@ -21,11 +21,7 @@ export default function RegisterForm() {
   return (
     <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <EmailInput placeholder="Почта" value={email} onChange={setEmail} />
-      <PasswordInput
-        placeholder="Пароль"
-        value={password}
-        onChange={setPassword}
-      />
+      <PasswordInput placeholder="Пароль" value={password} onChange={setPassword} />
       <PasswordInput
         placeholder="Подтверждение пароля"
         value={confirmPassword}
