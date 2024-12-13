@@ -12,7 +12,7 @@ export function BalanceCard({ balance }: BalanceCardProps) {
       <CardBody>
         <div className="flex justify-between items-center">
           <div className="text-lg font-semibold flex items-center gap-2">
-            <Wallet size={24} /> {balance?.toFixed(2) || "0.00"} $
+            <Wallet size={24} /> {balance?.toFixed(2) || "0.00"} USD
           </div>
           <Button color="primary" onClick={() => console.log("Пополнить")}>
             Пополнить

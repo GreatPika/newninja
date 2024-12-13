@@ -27,6 +27,7 @@ export function TokenUsageTable({
 }: TokenUsageTableProps) {
   return (
     <Table
+      isHeaderSticky
       isStriped
       aria-label="Таблица использования токенов"
       bottomContent={
@@ -56,7 +57,7 @@ export function TokenUsageTable({
         emptyContent={"Нет данных о расходах"}
         isLoading={isLoading}
         items={tokenData}
-        loadingContent={<Spinner />}
+        loadingContent={<Spinner label="Загрузка..." />}
       >
         {(item) => (
           <TableRow key={item.id}>

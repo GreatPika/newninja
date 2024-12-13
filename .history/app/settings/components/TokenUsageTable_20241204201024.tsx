@@ -38,10 +38,7 @@ export function TokenUsageTable({
           </div>
         ) : null
       }
-      classNames={{
-        base: "max-h-[32rem]",
-        table: "min-h-[26rem]",
-      }}
+
       shadow="none"
     >
       <TableHeader>

@@ -15,7 +15,7 @@ export function UserCard({ email }: UserCardProps) {
         <div className="flex justify-between items-center">
           <div className="text-lg font-semibold">{email}</div>
           <Button
-            variant="flat"
+            color="danger"
             onClick={async () => {
               try {
                 await signOut();

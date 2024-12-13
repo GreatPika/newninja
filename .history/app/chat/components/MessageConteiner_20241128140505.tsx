@@ -57,6 +57,7 @@ export function MessageConteiner({
       handleCopyTable(messageText);
       enqueueSnackbar("Таблица скопирована в буфер обмена", {
         variant: "success",
+        autoHideDuration: 2000,
       });
     },
     [enqueueSnackbar],
