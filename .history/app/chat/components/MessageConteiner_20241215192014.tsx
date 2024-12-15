@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardFooter,
   Button,
+  Input,
 } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
@@ -18,6 +19,7 @@ import { useSnackbar } from "notistack";
 import { Message, MessageConteinerProps } from "@/types/index";
 import { handleCopyTable } from "@/utils/handleCopyTable";
 import { formatDate } from "@/utils/formatDate";
+import { updateMessageRole } from "@/utils/indexedDB";
 
 export function MessageConteiner({
   messages,
@@ -30,6 +32,7 @@ export function MessageConteiner({
     Record<string, string>
   >({});
   const router = useRouter();
+  const [editingRole, setEditingRole] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (theme) {
@@ -68,6 +71,18 @@ export function MessageConteiner({
     }
   };
 
+  const handleRoleChange = async (messageId: number, newRole: string) => {
+    try {
+      await updateMessageRole(messageId, newRole);
+      setEditingRole((prev) => ({
+        ...prev,
+        [messageId]: newRole,
+      }));
+    } catch (error) {
+      enqueueSnackbar("Ошибка при обновлении роли", { variant: "error" });
+    }
+  };
+
   return (
     <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message: Message) => {
@@ -82,9 +97,20 @@ export function MessageConteiner({
             shadow="sm"
           >
             <CardHeader className="flex justify-between items-center">
-              <span className="text-md font-semibold mt-2">
-                {message.role === "user" ? "Вы" : message.role}
-              </span>
+              {message.role === "user" ? (
+                <span className="text-md font-semibold mt-2">Вы</span>
+              ) : (
+                <Input
+                  size="sm"
+                  value={editingRole[message.id] || message.role}
+                  onChange={(e) => {
+                    if (message.id) {
+                      handleRoleChange(message.id, e.target.value);
+                    }
+                  }}
+                  className="max-w-[200px]"
+                />
+              )}
             </CardHeader>
             <CardBody>
               <div
@@ -102,7 +128,7 @@ export function MessageConteiner({
                   radius="md"
                   size="sm"
                   variant="light"
-                  onPress={() => handleEdit(message)}
+                  onClick={() => handleEdit(message)}
                 >
                   <Pencil size={16} />
                 </Button>
@@ -112,7 +138,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onCopyTableHandler(renderedContent)}
+                    onClick={() => onCopyTableHandler(renderedContent)}
                   >
                     <Copy size={16} />
                   </Button>
@@ -123,7 +149,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onDelete(message.id)}
+                    onClick={() => onDelete(message.id)}
                   >
                     <Trash size={16} />
                   </Button>

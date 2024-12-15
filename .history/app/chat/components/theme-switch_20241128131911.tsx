@@ -22,7 +22,7 @@ export const ThemeSwitch: FC<ThemeSwitchProps> = ({ className }) => {
       className={className}
       radius="lg"
       variant="light"
-      onPress={toggleTheme}
+      onClick={toggleTheme}
     >
       {theme === "light" ? (
         <Sun size={22} strokeWidth={1.5} />

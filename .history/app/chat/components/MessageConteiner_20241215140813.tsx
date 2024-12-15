@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardFooter,
   Button,
+  Input,
 } from "@nextui-org/react";
 import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
@@ -83,7 +84,13 @@ export function MessageConteiner({
           >
             <CardHeader className="flex justify-between items-center">
               <span className="text-md font-semibold mt-2">
-                {message.role === "user" ? "Вы" : message.role}
+                {message.role === "user" ? "Вы" : (
+                  <Input 
+                    size="sm"
+                    value={message.role}
+
+                  />
+                )}
               </span>
             </CardHeader>
             <CardBody>
@@ -102,7 +109,7 @@ export function MessageConteiner({
                   radius="md"
                   size="sm"
                   variant="light"
-                  onPress={() => handleEdit(message)}
+                  onClick={() => handleEdit(message)}
                 >
                   <Pencil size={16} />
                 </Button>
@@ -112,7 +119,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onCopyTableHandler(renderedContent)}
+                    onClick={() => onCopyTableHandler(renderedContent)}
                   >
                     <Copy size={16} />
                   </Button>
@@ -123,7 +130,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onDelete(message.id)}
+                    onClick={() => onDelete(message.id)}
                   >
                     <Trash size={16} />
                   </Button>

@@ -102,7 +102,7 @@ export function MessageConteiner({
                   radius="md"
                   size="sm"
                   variant="light"
-                  onPress={() => handleEdit(message)}
+                  onClick={() => handleEdit(message)}
                 >
                   <Pencil size={16} />
                 </Button>
@@ -112,7 +112,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onCopyTableHandler(renderedContent)}
+                    onClick={() => onCopyTableHandler(renderedContent)}
                   >
                     <Copy size={16} />
                   </Button>
@@ -123,7 +123,7 @@ export function MessageConteiner({
                     radius="md"
                     size="sm"
                     variant="light"
-                    onPress={() => onDelete(message.id)}
+                    onClick={() => onDelete(message.id)}
                   >
                     <Trash size={16} />
                   </Button>

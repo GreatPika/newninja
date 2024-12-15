@@ -48,7 +48,7 @@ export function PromptInput({ onSubmit, disabled }: PromptInputProps) {
             color="primary"
             disabled={disabled}
             radius="lg"
-            onPress={handleSubmit}
+            onClick={handleSubmit}
           >
             <ArrowUp size={20} />
           </Button>
