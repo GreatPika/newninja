@@ -6,17 +6,17 @@ import {
   CardBody,
   CardHeader,
   CardFooter,
+  Button,
   Input,
 } from "@nextui-org/react";
 import "@/styles/github-markdown-custom.css";
 import { useRouter } from "next/navigation";
+import { Pencil, Copy, Trash } from "lucide-react";
 
 import { useThemeManager } from "../hooks/useThemeManager";
 import { useRenderedMessages } from "../hooks/useRenderedMessages";
 import { useRoleManager } from "../hooks/useRoleManager";
 import { useCopyTable } from "../hooks/useCopyTable";
-
-import { MessageActions } from "./MessageActions";
 
 import { formatDate } from "@/utils/formatDate";
 import { Message, MessageConteinerProps } from "@/types/index";
@@ -81,14 +81,39 @@ export function MessageConteiner({
             </CardBody>
             <CardFooter className="flex justify-between items-center">
               <div className="text-xs">{formatDate(message.timestamp)}</div>
-              <MessageActions
-                hasTable={hasTable}
-                message={message}
-                renderedContent={renderedContent}
-                onCopyTable={onCopyTableHandler}
-                onDelete={onDelete}
-                onEdit={handleEdit}
-              />
+              <div className="flex items-center">
+                <Button
+                  isIconOnly
+                  radius="md"
+                  size="sm"
+                  variant="light"
+                  onPress={() => handleEdit(message)}
+                >
+                  <Pencil size={16} />
+                </Button>
+                {hasTable && (
+                  <Button
+                    isIconOnly
+                    radius="md"
+                    size="sm"
+                    variant="light"
+                    onPress={() => onCopyTableHandler(renderedContent)}
+                  >
+                    <Copy size={16} />
+                  </Button>
+                )}
+                {message.id !== undefined && (
+                  <Button
+                    isIconOnly
+                    radius="md"
+                    size="sm"
+                    variant="light"
+                    onPress={() => onDelete(message.id)}
+                  >
+                    <Trash size={16} />
+                  </Button>
+                )}
+              </div>
             </CardFooter>
           </Card>
         );
