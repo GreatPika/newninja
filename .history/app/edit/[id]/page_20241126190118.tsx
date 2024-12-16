@@ -41,7 +41,7 @@ export default function EditPage() {
   const handleContentChange = async (content: string) => {
     if (messageId) {
       try {
-        await updateMessage(messageId, { text: content });
+        await updateMessage(messageId, content);
         console.log("Изменения сохранены");
       } catch (error) {
         console.error("Ошибка при сохранении изменений:", error);
