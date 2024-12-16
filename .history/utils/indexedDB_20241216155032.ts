@@ -56,19 +56,14 @@ export const deleteMessage = async (id: number): Promise<void> => {
 
 export const updateMessage = async (
   id: number,
-  updates: Partial<Omit<MessageDB, "id">>,
+  newRole: string,
 ): Promise<void> => {
   const db = await initializeDB();
   const tx = db.transaction(STORE_NAME, "readwrite");
   const message = await tx.store.get(id);
 
   if (message) {
-    if (updates.text !== undefined) {
-      message.text = updates.text;
-    }
-    if (updates.role !== undefined) {
-      message.role = updates.role;
-    }
+    message.role = newRole; // Обновляем только роль
     await tx.store.put(message);
   }
 

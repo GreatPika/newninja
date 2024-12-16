@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
-import { Message, MessageDB } from "@/types/index";
+import { Message } from "@/types/index";
 import {
   addMessage as dbAddMessage,
   getAllMessages as dbGetAllMessages,
   deleteMessage as dbDeleteMessage,
+  updateMessage as dbUpdateMessage,
 } from "@/utils/indexedDB";
-import { updateMessage as dbUpdateMessage } from "@/utils/indexedDB";
+
 export async function loadMessagesFromDB(): Promise<Message[]> {
   try {
     const storedMessages = await dbGetAllMessages();
@@ -45,25 +46,10 @@ export async function deleteMessageFromDB(id: number): Promise<void> {
   }
 }
 
-export async function updateMessageInDB(
-  id: number,
-  updates: Partial<Omit<Message, "id">>,
-): Promise<void> {
-  // Преобразуем объект updates в формат подходящий для MessageDB
-  const dbUpdates: Partial<Omit<MessageDB, "id">> = {};
-
-  if (updates.text !== undefined) {
-    dbUpdates.text = updates.text;
+export async function updateMessageRole(id: number, newRole: string): Promise<void> {
+  try {
+    await dbUpdateMessage(id, newRole);
+  } catch (error) {
+    console.error("Error updating message role:", error);
   }
-
-  if (updates.role !== undefined) {
-    dbUpdates.role = updates.role;
-  }
-
-  if (updates.timestamp !== undefined) {
-    // Здесь явно преобразуем Date в строку
-    dbUpdates.timestamp = updates.timestamp.toISOString();
-  }
-
-  await dbUpdateMessage(id, dbUpdates);
 }

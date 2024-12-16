@@ -61,7 +61,7 @@ export function MessageConteiner({
                   : message.id !== undefined && (
                       <Input
                         placeholder="Название продукта"
-                        size="lg"
+                        size="sm"
                         value={editingRoles[message.id] ?? message.role}
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>

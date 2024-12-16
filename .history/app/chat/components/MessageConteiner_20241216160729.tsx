@@ -11,15 +11,15 @@ import {
 } from "@nextui-org/react";
 import "@/styles/github-markdown-custom.css";
 import { useRouter } from "next/navigation";
-import { Pencil, Copy, Trash } from "lucide-react";
 
+import { Message, MessageConteinerProps } from "@/types/index";
+import { formatDate } from "@/utils/formatDate";
 import { useThemeManager } from "../hooks/useThemeManager";
 import { useRenderedMessages } from "../hooks/useRenderedMessages";
 import { useRoleManager } from "../hooks/useRoleManager";
 import { useCopyTable } from "../hooks/useCopyTable";
 
-import { formatDate } from "@/utils/formatDate";
-import { Message, MessageConteinerProps } from "@/types/index";
+import { Pencil, Copy, Trash } from "lucide-react";
 
 export function MessageConteiner({
   messages,
@@ -28,8 +28,7 @@ export function MessageConteiner({
 }: MessageConteinerProps) {
   useThemeManager();
   const renderedMessages = useRenderedMessages(messages);
-  const { editingRoles, handleRoleChange, handleRoleBlur } =
-    useRoleManager(messages);
+  const { editingRoles, handleRoleChange, handleRoleBlur } = useRoleManager(messages);
   const onCopyTableHandler = useCopyTable();
   const router = useRouter();
 
@@ -54,15 +53,16 @@ export function MessageConteiner({
             } max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
+            <CardHeader className="flex justify-between items-center">
+              <span className="text-md font-semibold mt-2">
                 {message.role === "user"
                   ? "Вы"
                   : message.id !== undefined && (
                       <Input
-                        placeholder="Название продукта"
-                        size="lg"
+                        placeholder="Роль"
+                        size="sm"
                         value={editingRoles[message.id] ?? message.role}
+                        width="150px"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)

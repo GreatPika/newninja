@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
-import { Message, MessageDB } from "@/types/index";
+import { Message } from "@/types/index";
 import {
   addMessage as dbAddMessage,
   getAllMessages as dbGetAllMessages,
   deleteMessage as dbDeleteMessage,
 } from "@/utils/indexedDB";
+
 import { updateMessage as dbUpdateMessage } from "@/utils/indexedDB";
 export async function loadMessagesFromDB(): Promise<Message[]> {
   try {
@@ -46,23 +47,14 @@ export async function deleteMessageFromDB(id: number): Promise<void> {
 }
 
 export async function updateMessageInDB(
-  id: number,
-  updates: Partial<Omit<Message, "id">>,
+  id: number, 
+  updates: Partial<Omit<Message, "id">>
 ): Promise<void> {
-  // Преобразуем объект updates в формат подходящий для MessageDB
-  const dbUpdates: Partial<Omit<MessageDB, "id">> = {};
+  const dbUpdates: Partial<Omit<Message, "id">> = { ...updates };
 
-  if (updates.text !== undefined) {
-    dbUpdates.text = updates.text;
-  }
-
-  if (updates.role !== undefined) {
-    dbUpdates.role = updates.role;
-  }
-
-  if (updates.timestamp !== undefined) {
-    // Здесь явно преобразуем Date в строку
-    dbUpdates.timestamp = updates.timestamp.toISOString();
+  // Конвертируем Date в ISO, если обновляем timestamp (не обязательно)
+  if (dbUpdates.timestamp instanceof Date) {
+    (dbUpdates as any).timestamp = dbUpdates.timestamp.toISOString();
   }
 
   await dbUpdateMessage(id, dbUpdates);

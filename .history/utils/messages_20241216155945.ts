@@ -5,6 +5,7 @@ import {
   getAllMessages as dbGetAllMessages,
   deleteMessage as dbDeleteMessage,
 } from "@/utils/indexedDB";
+
 import { updateMessage as dbUpdateMessage } from "@/utils/indexedDB";
 export async function loadMessagesFromDB(): Promise<Message[]> {
   try {
@@ -46,8 +47,8 @@ export async function deleteMessageFromDB(id: number): Promise<void> {
 }
 
 export async function updateMessageInDB(
-  id: number,
-  updates: Partial<Omit<Message, "id">>,
+  id: number, 
+  updates: Partial<Omit<Message, "id">>
 ): Promise<void> {
   // Преобразуем объект updates в формат подходящий для MessageDB
   const dbUpdates: Partial<Omit<MessageDB, "id">> = {};

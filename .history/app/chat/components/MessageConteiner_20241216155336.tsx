@@ -1,5 +1,4 @@
 // components/MessageContainer.tsx
-
 import {
   Spinner,
   Card,
@@ -7,31 +6,61 @@ import {
   CardHeader,
   CardFooter,
   Button,
-  Input,
 } from "@nextui-org/react";
+import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
+import { useTheme } from "next-themes";
+import { useEffect, useState, useCallback } from "react";
+import { Copy, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Pencil, Copy, Trash } from "lucide-react";
+import { useSnackbar } from "notistack";
 
-import { useThemeManager } from "../hooks/useThemeManager";
-import { useRenderedMessages } from "../hooks/useRenderedMessages";
-import { useRoleManager } from "../hooks/useRoleManager";
-import { useCopyTable } from "../hooks/useCopyTable";
-
-import { formatDate } from "@/utils/formatDate";
 import { Message, MessageConteinerProps } from "@/types/index";
+import { handleCopyTable } from "@/utils/handleCopyTable";
+import { formatDate } from "@/utils/formatDate";
 
 export function MessageConteiner({
   messages,
   loading,
   onDelete,
 }: MessageConteinerProps) {
-  useThemeManager();
-  const renderedMessages = useRenderedMessages(messages);
-  const { editingRoles, handleRoleChange, handleRoleBlur } =
-    useRoleManager(messages);
-  const onCopyTableHandler = useCopyTable();
+  const { theme } = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const [renderedMessages, setRenderedMessages] = useState<
+    Record<string, string>
+  >({});
   const router = useRouter();
+
+  useEffect(() => {
+    if (theme) {
+      document.body.setAttribute("data-theme", theme);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    const renderMessages = async () => {
+      const rendered: Record<string, string> = {};
+
+      for (const message of messages) {
+        const key = message.timestamp.toISOString();
+
+        rendered[key] = await marked(message.text);
+      }
+      setRenderedMessages(rendered);
+    };
+
+    renderMessages();
+  }, [messages]);
+
+  const onCopyTableHandler = useCallback(
+    (messageText: string) => {
+      handleCopyTable(messageText);
+      enqueueSnackbar("Таблица скопирована в буфер обмена", {
+        variant: "success",
+      });
+    },
+    [enqueueSnackbar],
+  );
 
   const handleEdit = (message: Message) => {
     if (message.id) {
@@ -49,26 +78,12 @@ export function MessageConteiner({
         return (
           <Card
             key={message.id ?? messageKey}
-            className={`${
-              message.role === "user" ? "ml-auto" : "mr-auto"
-            } max-w-full`}
+            className={`${message.role === "user" ? "ml-auto" : "mr-auto"} max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
-                {message.role === "user"
-                  ? "Вы"
-                  : message.id !== undefined && (
-                      <Input
-                        placeholder="Название продукта"
-                        size="lg"
-                        value={editingRoles[message.id] ?? message.role}
-                        onBlur={() => handleRoleBlur(message.id as number)}
-                        onChange={(e) =>
-                          handleRoleChange(message.id as number, e.target.value)
-                        }
-                      />
-                    )}
+            <CardHeader className="flex justify-between items-center">
+              <span className="text-md font-semibold mt-2">
+                {message.role === "user" ? "Вы" : message.role}
               </span>
             </CardHeader>
             <CardBody>

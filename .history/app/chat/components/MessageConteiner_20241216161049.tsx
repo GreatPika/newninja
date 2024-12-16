@@ -54,15 +54,16 @@ export function MessageConteiner({
             } max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
+            <CardHeader className="flex justify-between items-center">
+              <span className="text-md font-semibold mt-2">
                 {message.role === "user"
                   ? "Вы"
                   : message.id !== undefined && (
                       <Input
-                        placeholder="Название продукта"
-                        size="lg"
+                        placeholder="Роль"
+                        size="sm"
                         value={editingRoles[message.id] ?? message.role}
+                        width="full"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)

@@ -60,6 +60,7 @@ export function MessageConteiner({
                   ? "Вы"
                   : message.id !== undefined && (
                       <Input
+                        isClearable
                         placeholder="Название продукта"
                         size="lg"
                         value={editingRoles[message.id] ?? message.role}

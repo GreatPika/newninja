@@ -9,34 +9,94 @@ import {
   Button,
   Input,
 } from "@nextui-org/react";
+import { marked } from "marked";
 import "@/styles/github-markdown-custom.css";
+import { useTheme } from "next-themes";
+import { useEffect, useState, useCallback } from "react";
+import { Copy, Trash, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Pencil, Copy, Trash } from "lucide-react";
+import { useSnackbar } from "notistack";
 
-import { useThemeManager } from "../hooks/useThemeManager";
-import { useRenderedMessages } from "../hooks/useRenderedMessages";
-import { useRoleManager } from "../hooks/useRoleManager";
-import { useCopyTable } from "../hooks/useCopyTable";
-
-import { formatDate } from "@/utils/formatDate";
 import { Message, MessageConteinerProps } from "@/types/index";
+import { handleCopyTable } from "@/utils/handleCopyTable";
+import { formatDate } from "@/utils/formatDate";
+import { updateMessageInDB } from "@/utils/messages";
 
 export function MessageConteiner({
   messages,
   loading,
   onDelete,
 }: MessageConteinerProps) {
-  useThemeManager();
-  const renderedMessages = useRenderedMessages(messages);
-  const { editingRoles, handleRoleChange, handleRoleBlur } =
-    useRoleManager(messages);
-  const onCopyTableHandler = useCopyTable();
+  const { theme } = useTheme();
+  const { enqueueSnackbar } = useSnackbar();
+  const [renderedMessages, setRenderedMessages] = useState<
+    Record<string, string>
+  >({});
+
+  // Локальное состояние для редактирования роли
+  const [editingRoles, setEditingRoles] = useState<Record<number, string>>({});
+
   const router = useRouter();
+
+  useEffect(() => {
+    if (theme) {
+      document.body.setAttribute("data-theme", theme);
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    const renderMessages = async () => {
+      const rendered: Record<string, string> = {};
+
+      for (const message of messages) {
+        const key = message.timestamp.toISOString();
+
+        rendered[key] = await marked(message.text);
+      }
+      setRenderedMessages(rendered);
+    };
+
+    renderMessages();
+  }, [messages]);
+
+  // Инициализируем роли в состоянии, чтобы отображать их в Input
+  useEffect(() => {
+    const rolesMap: Record<number, string> = {};
+
+    for (const msg of messages) {
+      if (msg.id !== undefined && msg.role !== "user") {
+        rolesMap[msg.id] = msg.role;
+      }
+    }
+    setEditingRoles((prev) => ({ ...prev, ...rolesMap }));
+  }, [messages]);
+
+  const onCopyTableHandler = useCallback(
+    (messageText: string) => {
+      handleCopyTable(messageText);
+      enqueueSnackbar("Таблица скопирована в буфер обмена", {
+        variant: "success",
+      });
+    },
+    [enqueueSnackbar],
+  );
 
   const handleEdit = (message: Message) => {
     if (message.id) {
       router.push(`/edit/${message.id}`);
     }
+  };
+
+  const handleRoleChange = (id: number, newRole: string) => {
+    setEditingRoles((prev) => ({ ...prev, [id]: newRole }));
+  };
+
+  const handleRoleBlur = async (id: number) => {
+    const newRole = editingRoles[id];
+
+    // Сохраняем изменение в IndexedDB
+    await updateMessageInDB(id, { role: newRole });
+    enqueueSnackbar("Роль обновлена", { variant: "success" });
   };
 
   return (
@@ -54,15 +114,16 @@ export function MessageConteiner({
             } max-w-full`}
             shadow="sm"
           >
-            <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
+            <CardHeader className="flex justify-between items-center">
+              <span className="text-md font-semibold mt-2">
                 {message.role === "user"
                   ? "Вы"
                   : message.id !== undefined && (
                       <Input
-                        placeholder="Название продукта"
-                        size="lg"
+                        placeholder="Роль"
+                        size="sm"
                         value={editingRoles[message.id] ?? message.role}
+                        width="150px"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)
