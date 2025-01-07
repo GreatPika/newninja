@@ -117,7 +117,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };
@@ -138,5 +138,5 @@ export const exportMessagesToExcel = async () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Новый проект.xlsx");
+  saveAs(blob, "table-export.xlsx");
 };

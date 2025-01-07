@@ -2,7 +2,7 @@ import type { Workbook, Worksheet, Cell } from "exceljs";
 
 import { saveAs } from "file-saver";
 
-import { getAllMessages } from "./indexedDB";
+import { getAllMessages, getMessageById } from "./indexedDB";
 
 const parseMarkdownTable = (markdown: string) => {
   const lines = markdown.trim().split("\n");
@@ -20,13 +20,7 @@ const parseMarkdownTable = (markdown: string) => {
     .slice(2)
     .map((line) => line.split("|").map((cell) => cell.trim()));
 
-  // Удаляем пустые заголовки и соответствующие пустые колонки
-  const validHeaders = headers.filter((header) => header !== "");
-  const validRows = rows.map((row) =>
-    row.filter((_, index) => headers[index] !== ""),
-  );
-
-  return { headers: validHeaders, rows: validRows };
+  return { headers, rows };
 };
 
 export const exportMessagesToExcel = async () => {
@@ -39,17 +33,13 @@ export const exportMessagesToExcel = async () => {
   const assistantMessages = messages.filter((msg) => msg.role !== "user");
 
   // Собираем все таблицы из сообщений
-  const allTables: {
-    headers: string[];
-    rows: string[][];
-    productName: string;
-  }[] = [];
+  const allTables: { headers: string[]; rows: string[][] }[] = [];
 
   for (const msg of assistantMessages) {
     const parsed = parseMarkdownTable(msg.text);
 
     if (parsed) {
-      allTables.push({ ...parsed, productName: msg.role });
+      allTables.push(parsed);
     }
   }
 
@@ -76,13 +66,16 @@ export const exportMessagesToExcel = async () => {
     const startRow = currentRowNumber;
 
     for (const row of table.rows) {
+      const message = await getMessageById(tableNumber); // Получаем сообщение по идентификатору
+      const productName = message ? message.role : "Неизвестный товар"; // Используем роль как название товара
+
       const rowData: Record<string, string | number> = {
         number: tableNumber,
-        productName: table.productName, // Используем роль как название товара
+        productName: productName,
       };
 
       table.headers.forEach((header, index) => {
-        rowData[header] = row[index] || ""; // Сохраняем пустые ячейки
+        rowData[header] = row[index] || "";
       });
       worksheet.addRow(rowData);
       currentRowNumber++;
@@ -95,7 +88,7 @@ export const exportMessagesToExcel = async () => {
 
       // Центрируем текст в объединенных ячейках
       worksheet.getCell(`A${startRow}`).alignment = {
-        vertical: "top",
+        vertical: "middle",
         horizontal: "center",
       };
       worksheet.getCell(`B${startRow}`).alignment = {
@@ -117,7 +110,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };
@@ -138,5 +131,5 @@ export const exportMessagesToExcel = async () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Новый проект.xlsx");
+  saveAs(blob, "table-export.xlsx");
 };

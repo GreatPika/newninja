@@ -95,7 +95,7 @@ export const exportMessagesToExcel = async () => {
 
       // Центрируем текст в объединенных ячейках
       worksheet.getCell(`A${startRow}`).alignment = {
-        vertical: "top",
+        vertical: "middle",
         horizontal: "center",
       };
       worksheet.getCell(`B${startRow}`).alignment = {
@@ -117,7 +117,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };
@@ -138,5 +138,5 @@ export const exportMessagesToExcel = async () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Новый проект.xlsx");
+  saveAs(blob, "table-export.xlsx");
 };

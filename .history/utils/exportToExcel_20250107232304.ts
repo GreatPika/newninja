@@ -117,7 +117,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };

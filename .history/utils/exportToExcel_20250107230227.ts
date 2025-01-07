@@ -20,13 +20,7 @@ const parseMarkdownTable = (markdown: string) => {
     .slice(2)
     .map((line) => line.split("|").map((cell) => cell.trim()));
 
-  // Удаляем пустые заголовки и соответствующие пустые колонки
-  const validHeaders = headers.filter((header) => header !== "");
-  const validRows = rows.map((row) =>
-    row.filter((_, index) => headers[index] !== ""),
-  );
-
-  return { headers: validHeaders, rows: validRows };
+  return { headers, rows };
 };
 
 export const exportMessagesToExcel = async () => {
@@ -39,17 +33,13 @@ export const exportMessagesToExcel = async () => {
   const assistantMessages = messages.filter((msg) => msg.role !== "user");
 
   // Собираем все таблицы из сообщений
-  const allTables: {
-    headers: string[];
-    rows: string[][];
-    productName: string;
-  }[] = [];
+  const allTables: { headers: string[]; rows: string[][] }[] = [];
 
   for (const msg of assistantMessages) {
     const parsed = parseMarkdownTable(msg.text);
 
     if (parsed) {
-      allTables.push({ ...parsed, productName: msg.role });
+      allTables.push(parsed);
     }
   }
 
@@ -58,54 +48,43 @@ export const exportMessagesToExcel = async () => {
   }
 
   // Настраиваем колонки
-  worksheet.columns = [
-    { header: "№ п.п", key: "number", width: 10 },
-    { header: "Наименование товара", key: "productName", width: 30 },
-    ...allTables[0].headers.map((header) => ({
-      header,
-      key: header,
-      width: 30,
-    })),
-  ];
+  worksheet.columns = allTables[0].headers.map((header, index) => ({
+    header: index === 0 ? "№ п.п" : header,
+    key: header,
+    width: index === 0 ? 10 : 30,
+  }));
 
   // Добавляем данные из всех таблиц
-  let tableNumber = 1;
   let currentRowNumber = 2; // Начинаем с 2, так как 1-я строка - это заголовки
+  let globalOrderNumber = 1; // Глобальный порядковый номер для всех строк
 
-  for (const table of allTables) {
+  allTables.forEach((table) => {
     const startRow = currentRowNumber;
 
-    for (const row of table.rows) {
+    table.rows.forEach((row) => {
       const rowData: Record<string, string | number> = {
-        number: tableNumber,
-        productName: table.productName, // Используем роль как название товара
+        "№ п.п": globalOrderNumber, // Используем глобальный порядковый номер
       };
 
       table.headers.forEach((header, index) => {
-        rowData[header] = row[index] || ""; // Сохраняем пустые ячейки
+        rowData[header] = row[index] || "";
       });
       worksheet.addRow(rowData);
       currentRowNumber++;
-    }
+      globalOrderNumber++; // Увеличиваем глобальный порядковый номер для каждой строки
+    });
 
-    // Объединяем ячейки с номером таблицы и наименованием товара
+    // Объединяем ячейки с номером таблицы
     if (startRow < currentRowNumber) {
       worksheet.mergeCells(`A${startRow}:A${currentRowNumber - 1}`);
-      worksheet.mergeCells(`B${startRow}:B${currentRowNumber - 1}`);
 
-      // Центрируем текст в объединенных ячейках
+      // Центрируем текст в объединенной ячейке
       worksheet.getCell(`A${startRow}`).alignment = {
-        vertical: "top",
-        horizontal: "center",
-      };
-      worksheet.getCell(`B${startRow}`).alignment = {
         vertical: "middle",
         horizontal: "center",
       };
     }
-
-    tableNumber++;
-  }
+  });
 
   // Стилизация
   const setCellStyle = (cell: Cell) => {
@@ -117,7 +96,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };
@@ -138,5 +117,5 @@ export const exportMessagesToExcel = async () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Новый проект.xlsx");
+  saveAs(blob, "table-export.xlsx");
 };

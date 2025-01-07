@@ -20,13 +20,7 @@ const parseMarkdownTable = (markdown: string) => {
     .slice(2)
     .map((line) => line.split("|").map((cell) => cell.trim()));
 
-  // Удаляем пустые заголовки и соответствующие пустые колонки
-  const validHeaders = headers.filter((header) => header !== "");
-  const validRows = rows.map((row) =>
-    row.filter((_, index) => headers[index] !== ""),
-  );
-
-  return { headers: validHeaders, rows: validRows };
+  return { headers, rows };
 };
 
 export const exportMessagesToExcel = async () => {
@@ -39,17 +33,13 @@ export const exportMessagesToExcel = async () => {
   const assistantMessages = messages.filter((msg) => msg.role !== "user");
 
   // Собираем все таблицы из сообщений
-  const allTables: {
-    headers: string[];
-    rows: string[][];
-    productName: string;
-  }[] = [];
+  const allTables: { headers: string[]; rows: string[][] }[] = [];
 
   for (const msg of assistantMessages) {
     const parsed = parseMarkdownTable(msg.text);
 
     if (parsed) {
-      allTables.push({ ...parsed, productName: msg.role });
+      allTables.push(parsed);
     }
   }
 
@@ -72,21 +62,21 @@ export const exportMessagesToExcel = async () => {
   let tableNumber = 1;
   let currentRowNumber = 2; // Начинаем с 2, так как 1-я строка - это заголовки
 
-  for (const table of allTables) {
+  allTables.forEach((table) => {
     const startRow = currentRowNumber;
 
-    for (const row of table.rows) {
+    table.rows.forEach((row) => {
       const rowData: Record<string, string | number> = {
         number: tableNumber,
-        productName: table.productName, // Используем роль как название товара
+        productName: "Пример товара", // Здесь можно указать реальное значение
       };
 
       table.headers.forEach((header, index) => {
-        rowData[header] = row[index] || ""; // Сохраняем пустые ячейки
+        rowData[header] = row[index] || "";
       });
       worksheet.addRow(rowData);
       currentRowNumber++;
-    }
+    });
 
     // Объединяем ячейки с номером таблицы и наименованием товара
     if (startRow < currentRowNumber) {
@@ -95,7 +85,7 @@ export const exportMessagesToExcel = async () => {
 
       // Центрируем текст в объединенных ячейках
       worksheet.getCell(`A${startRow}`).alignment = {
-        vertical: "top",
+        vertical: "middle",
         horizontal: "center",
       };
       worksheet.getCell(`B${startRow}`).alignment = {
@@ -105,7 +95,7 @@ export const exportMessagesToExcel = async () => {
     }
 
     tableNumber++;
-  }
+  });
 
   // Стилизация
   const setCellStyle = (cell: Cell) => {
@@ -117,7 +107,7 @@ export const exportMessagesToExcel = async () => {
     };
     cell.alignment = {
       vertical: "top",
-      horizontal: "center",
+      horizontal: "left",
       wrapText: true,
     };
   };
@@ -138,5 +128,5 @@ export const exportMessagesToExcel = async () => {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Новый проект.xlsx");
+  saveAs(blob, "table-export.xlsx");
 };
