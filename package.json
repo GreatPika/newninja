@@ -27,6 +27,8 @@
 		"@supabase/supabase-js": "^2.46.1",
 		"clsx": "2.1.1",
 		"event-source-polyfill": "^1.0.31",
+		"exceljs": "^4.4.0",
+		"file-saver": "^2.0.5",
 		"framer-motion": "^11.14.4",
 		"idb": "^8.0.0",
 		"intl-messageformat": "^10.5.0",
@@ -42,6 +44,7 @@
 	"devDependencies": {
 		"@next/eslint-plugin-next": "^15.0.3",
 		"@types/event-source-polyfill": "^1.0.5",
+		"@types/file-saver": "^2.0.7",
 		"@types/node": "20.5.7",
 		"@types/react": "18.3.3",
 		"@types/react-dom": "18.3.0",

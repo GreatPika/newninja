@@ -64,7 +64,6 @@ export function MessageConteiner({
                         radius="sm"
                         size="lg"
                         value={editingRoles[message.id] ?? message.role}
-                        variant="flat"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)

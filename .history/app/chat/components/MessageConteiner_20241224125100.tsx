@@ -55,7 +55,7 @@ export function MessageConteiner({
             shadow="sm"
           >
             <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
+              <span className="text-md font-semibold w-full">
                 {message.role === "user"
                   ? "Вы"
                   : message.id !== undefined && (
@@ -64,7 +64,7 @@ export function MessageConteiner({
                         radius="sm"
                         size="lg"
                         value={editingRoles[message.id] ?? message.role}
-                        variant="flat"
+                        variant="bordered"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)

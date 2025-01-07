@@ -7,9 +7,12 @@ import {
   CardHeader,
   CardFooter,
   Input,
+  Button,
 } from "@nextui-org/react";
 import "@/styles/github-markdown-custom.css";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { PencilIcon } from "lucide-react";
 
 import { useThemeManager } from "../hooks/useThemeManager";
 import { useRenderedMessages } from "../hooks/useRenderedMessages";
@@ -28,15 +31,28 @@ export function MessageConteiner({
 }: MessageConteinerProps) {
   useThemeManager();
   const renderedMessages = useRenderedMessages(messages);
-  const { editingRoles, handleRoleChange, handleRoleBlur } =
-    useRoleManager(messages);
+  const {
+    editingRoles,
+    handleRoleChange,
+    handleRoleBlur: onRoleBlur,
+  } = useRoleManager(messages);
   const onCopyTableHandler = useCopyTable();
   const router = useRouter();
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
 
   const handleEdit = (message: Message) => {
     if (message.id) {
       router.push(`/edit/${message.id}`);
     }
+  };
+
+  const handleEditClick = (messageId: number) => {
+    setEditingMessageId(messageId);
+  };
+
+  const handleRoleBlur = (messageId: number) => {
+    setEditingMessageId(null);
+    onRoleBlur(messageId);
   };
 
   return (
@@ -55,22 +71,40 @@ export function MessageConteiner({
             shadow="sm"
           >
             <CardHeader className="w-full">
-              <span className="text-md font-semibold mt-2 w-full">
-                {message.role === "user"
-                  ? "Вы"
-                  : message.id !== undefined && (
+              <span className="text-lg font-semibold mt-2 w-full">
+                {message.role === "user" ? (
+                  "Вы"
+                ) : message.id !== undefined ? (
+                  <div className="flex items-center gap-2">
+                    {editingMessageId === message.id ? (
                       <Input
                         placeholder="Название продукта"
                         radius="sm"
                         size="lg"
                         value={editingRoles[message.id] ?? message.role}
-                        variant="flat"
+                        variant="bordered"
                         onBlur={() => handleRoleBlur(message.id as number)}
                         onChange={(e) =>
                           handleRoleChange(message.id as number, e.target.value)
                         }
                       />
+                    ) : (
+                      <>
+                        <span>{editingRoles[message.id] ?? message.role}</span>
+                        <Button
+                          isIconOnly
+                          radius="md"
+                          size="sm"
+                          variant="light"
+                          className="self-start mt-0.5"
+                          onPress={() => handleEditClick(message.id as number)}
+                        >
+                          <PencilIcon size={16} />
+                        </Button>
+                      </>
                     )}
+                  </div>
+                ) : null}
               </span>
             </CardHeader>
             <CardBody>
