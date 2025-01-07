@@ -1,4 +1,4 @@
-import type { Workbook, Worksheet } from "exceljs";
+import type { Workbook, Worksheet, Cell } from "exceljs";
 
 import { saveAs } from "file-saver";
 
@@ -9,16 +9,14 @@ const parseMarkdownTable = (markdown: string) => {
 
   if (lines.length < 2 || !lines[0].includes("|")) return null;
 
-  const headers = lines[0]
-    .split("|")
-    .map((header) => header.trim())
-    .filter((header) => header !== "");
+  const headers = lines[0].split("|")
+    .map(header => header.trim())
+    .filter(header => header !== "");
 
-  const rows = lines.slice(2).map((line) =>
-    line
-      .split("|")
-      .map((cell) => cell.trim())
-      .filter((_, index) => lines[0].split("|")[index].trim() !== ""),
+  const rows = lines.slice(2).map(line => 
+    line.split("|")
+      .map(cell => cell.trim())
+      .filter((_, index) => lines[0].split("|")[index].trim() !== "")
   );
 
   return { headers, rows };
@@ -30,26 +28,20 @@ export const exportMessagesToExcel = async () => {
   const worksheet: Worksheet = workbook.addWorksheet("Данные");
 
   const allTables = (await getAllMessages())
-    .filter((msg) => msg.role !== "user")
-    .reduce(
-      (tables, msg) => {
-        const parsed = parseMarkdownTable(msg.text);
-
-        return parsed
-          ? [...tables, { ...parsed, productName: msg.role }]
-          : tables;
-      },
-      [] as { headers: string[]; rows: string[][]; productName: string }[],
-    );
+    .filter(msg => msg.role !== "user")
+    .reduce((tables, msg) => {
+      const parsed = parseMarkdownTable(msg.text);
+      return parsed ? [...tables, { ...parsed, productName: msg.role }] : tables;
+    }, [] as { headers: string[]; rows: string[][]; productName: string; }[]);
 
   if (allTables.length === 0) return;
 
-  const defaultAlignment = { vertical: "top", horizontal: "center" } as const;
+  const defaultAlignment = { vertical: 'top', horizontal: 'center' } as const;
 
   worksheet.columns = [
     { header: "№ п.п", key: "number", width: 10 },
     { header: "Наименование товара", key: "productName", width: 30 },
-    ...allTables[0].headers.map((header) => ({
+    ...allTables[0].headers.map(header => ({
       header,
       key: header,
       width: 30,
@@ -61,26 +53,22 @@ export const exportMessagesToExcel = async () => {
   allTables.forEach((table, tableIndex) => {
     const startRow = currentRowNumber;
 
-    table.rows.forEach((row) => {
+    table.rows.forEach(row => {
       worksheet.addRow({
         number: tableIndex + 1,
         productName: table.productName,
-        ...Object.fromEntries(
-          table.headers.map((header, i) => [header, row[i] || ""]),
-        ),
+        ...Object.fromEntries(table.headers.map((header, i) => [header, row[i] || ""]))
       });
       currentRowNumber++;
     });
 
     if (startRow < currentRowNumber) {
-      ["A", "B"].forEach((col) => {
+      ['A', 'B'].forEach(col => {
         worksheet.mergeCells(`${col}${startRow}:${col}${currentRowNumber - 1}`);
         const cell = worksheet.getCell(`${col}${startRow}`);
-
-        cell.alignment =
-          col === "B"
-            ? { ...defaultAlignment, vertical: "middle" }
-            : defaultAlignment;
+        cell.alignment = col === 'B' ? 
+          { ...defaultAlignment, vertical: 'middle' } : 
+          defaultAlignment;
       });
     }
   });
@@ -95,11 +83,11 @@ export const exportMessagesToExcel = async () => {
     alignment: {
       ...defaultAlignment,
       wrapText: true,
-    },
+    }
   };
 
   worksheet.eachRow((row, rowNumber) => {
-    row.eachCell((cell) => {
+    row.eachCell(cell => {
       Object.assign(cell, cellStyle);
       if (rowNumber === 1) {
         cell.font = { bold: true };
