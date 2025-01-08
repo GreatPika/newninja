@@ -41,30 +41,22 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
 
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
-
     if (editor) {
-      const escapedSymbol =
-        symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
+      const escapedSymbol = symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
       editor.insertMarkdown(escapedSymbol);
     } else {
+      console.error("Editor reference is not available.");
     }
   };
 
-  const SymbolButton = ({
-    symbol,
-    title,
-  }: {
-    symbol: string;
-    title: string;
-  }) => (
+  const SymbolButton = ({ symbol, title }: { symbol: string; title: string }) => (
     <ButtonWithTooltip
+      onClick={() => insertSymbolAtCursor(symbol)}
+      title={title}
       style={{
         margin: "0", // Убираем расстояние между кнопками
         padding: "0", // Убираем внутренние отступы
       }}
-      title={title}
-      onClick={() => insertSymbolAtCursor(symbol)}
     >
       <span
         style={{

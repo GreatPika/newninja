@@ -15,7 +15,7 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
+  ButtonWithTooltip, // Импортируем ButtonWithTooltip
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -39,43 +39,34 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
+  // Функция для вставки символа в позицию курсора
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
-
     if (editor) {
-      const escapedSymbol =
-        symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
+      const escapedSymbol = symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
       editor.insertMarkdown(escapedSymbol);
     } else {
+      console.error("Editor reference is not available.");
     }
   };
 
-  const SymbolButton = ({
-    symbol,
-    title,
-  }: {
-    symbol: string;
-    title: string;
-  }) => (
+  // Компонент кнопки с тултипом
+  const SymbolButton = ({ symbol, title }: { symbol: string; title: string }) => (
     <ButtonWithTooltip
-      style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
-      }}
-      title={title}
       onClick={() => insertSymbolAtCursor(symbol)}
+      title={title} // Используем title для тултипа
     >
       <span
         style={{
-          fontSize: "24px", // Размер символа
+          fontSize: "20px", // Размер символа
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
+          width: "40px", // Ширина кнопки
+          height: "40px", // Высота кнопки
+          border: "1px solid #ccc", // Граница для визуального разделения
           borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
+          boxSizing: "border-box",
         }}
       >
         {symbol}
@@ -106,6 +97,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
+              {/* Добавляем кнопки с символами и тултипами */}
               <SymbolButton symbol="≥" title="Insert ≥" />
               <SymbolButton symbol="≤" title="Insert ≤" />
               <SymbolButton symbol="<" title="Insert <" />

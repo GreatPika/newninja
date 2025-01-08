@@ -27,7 +27,7 @@ export function PromptInput({ onSubmit, disabled }: PromptInputProps) {
   };
 
   return (
-    <div className="absolut">
+    <div className="absolut z-50">
       <Card className="rounded-[20px] mb-8">
         <CardBody className="min-h-[90px]">
           <Textarea

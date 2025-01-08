@@ -15,14 +15,13 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
   BoldItalicUnderlineToggles,
   InsertTable,
 } from "@mdxeditor/editor";
-import { FC, useRef } from "react";
+import { FC } from "react";
 import { useTheme } from "next-themes";
 
 interface EditorProps {
@@ -33,59 +32,38 @@ interface EditorProps {
 
 const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
   const { theme } = useTheme();
-  const localEditorRef = useRef<MDXEditorMethods | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
-  const insertSymbolAtCursor = (symbol: string) => {
-    const editor = editorRef?.current || localEditorRef.current;
-
-    if (editor) {
-      const escapedSymbol =
-        symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
-      editor.insertMarkdown(escapedSymbol);
-    } else {
-    }
+  // Function to copy symbol to clipboard
+  const copyToClipboard = (symbol: string) => {
+    navigator.clipboard.writeText(symbol).then(() => {
+      alert(`Copied: ${symbol}`);
+    });
   };
 
-  const SymbolButton = ({
-    symbol,
-    title,
-  }: {
-    symbol: string;
-    title: string;
-  }) => (
-    <ButtonWithTooltip
+  // Custom Buttons
+  const SymbolButton = ({ symbol }: { symbol: string }) => (
+    <button
+      onClick={() => copyToClipboard(symbol)}
+      title={`Copy ${symbol}`}
       style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
+        backgroundColor: "transparent",
+        border: "none",
+        cursor: "pointer",
+        padding: "5px",
+        fontSize: "16px",
       }}
-      title={title}
-      onClick={() => insertSymbolAtCursor(symbol)}
     >
-      <span
-        style={{
-          fontSize: "24px", // Размер символа
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
-          borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
-        }}
-      >
-        {symbol}
-      </span>
-    </ButtonWithTooltip>
+      {symbol}
+    </button>
   );
 
   return (
     <MDXEditor
-      ref={editorRef || localEditorRef}
+      ref={editorRef}
       className={getEditorClassName()}
       markdown={markdown || ""}
       plugins={[
@@ -106,10 +84,11 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
-              <SymbolButton symbol="≥" title="Insert ≥" />
-              <SymbolButton symbol="≤" title="Insert ≤" />
-              <SymbolButton symbol="<" title="Insert <" />
-              <SymbolButton symbol=">" title="Insert >" />
+              {/* Add Custom Buttons */}
+              <SymbolButton symbol="≥" />
+              <SymbolButton symbol="≤" />
+              <SymbolButton symbol="<" />
+              <SymbolButton symbol=">" />
             </>
           ),
         }),

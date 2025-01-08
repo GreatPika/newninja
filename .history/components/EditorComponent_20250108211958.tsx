@@ -15,7 +15,7 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
+  Button, // Импортируем Button
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -39,48 +39,31 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
+  // Функция для вставки символа в позицию курсора
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
-
     if (editor) {
-      const escapedSymbol =
-        symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
+      const escapedSymbol = symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
       editor.insertMarkdown(escapedSymbol);
     } else {
+      console.error("Editor reference is not available.");
     }
   };
 
-  const SymbolButton = ({
-    symbol,
-    title,
-  }: {
-    symbol: string;
-    title: string;
-  }) => (
-    <ButtonWithTooltip
-      style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
-      }}
-      title={title}
+  // Компонент кнопки с тултипом
+  const SymbolButton = ({ symbol, tooltip }: { symbol: string; tooltip: string }) => (
+    <Button
       onClick={() => insertSymbolAtCursor(symbol)}
+      title={tooltip} // Тултип на английском
     >
       <span
         style={{
-          fontSize: "24px", // Размер символа
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
-          borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
+          fontSize: "24px", // Размер символа на кнопке
         }}
       >
         {symbol}
       </span>
-    </ButtonWithTooltip>
+    </Button>
   );
 
   return (
@@ -106,10 +89,11 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
-              <SymbolButton symbol="≥" title="Insert ≥" />
-              <SymbolButton symbol="≤" title="Insert ≤" />
-              <SymbolButton symbol="<" title="Insert <" />
-              <SymbolButton symbol=">" title="Insert >" />
+              {/* Добавляем кнопки с символами и тултипами */}
+              <SymbolButton symbol="≥" tooltip="Insert ≥" />
+              <SymbolButton symbol="≤" tooltip="Insert ≤" />
+              <SymbolButton symbol="<" tooltip="Insert <" />
+              <SymbolButton symbol=">" tooltip="Insert >" />
             </>
           ),
         }),

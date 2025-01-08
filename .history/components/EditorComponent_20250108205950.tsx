@@ -15,7 +15,6 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -39,48 +38,31 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
+  // Function to insert symbol at cursor position
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
-
     if (editor) {
-      const escapedSymbol =
-        symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
-      editor.insertMarkdown(escapedSymbol);
+      editor.insertMarkdown(symbol);
     } else {
+      console.error("Editor reference is not available.");
     }
   };
 
-  const SymbolButton = ({
-    symbol,
-    title,
-  }: {
-    symbol: string;
-    title: string;
-  }) => (
-    <ButtonWithTooltip
-      style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
-      }}
-      title={title}
+  // Custom Button Component
+  const SymbolButton = ({ symbol }: { symbol: string }) => (
+    <button
       onClick={() => insertSymbolAtCursor(symbol)}
+      title={`Insert ${symbol}`}
+      style={{
+        backgroundColor: "transparent",
+        border: "none",
+        cursor: "pointer",
+        padding: "5px",
+        fontSize: "16px",
+      }}
     >
-      <span
-        style={{
-          fontSize: "24px", // Размер символа
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
-          borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
-        }}
-      >
-        {symbol}
-      </span>
-    </ButtonWithTooltip>
+      {symbol}
+    </button>
   );
 
   return (
@@ -106,10 +88,11 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
-              <SymbolButton symbol="≥" title="Insert ≥" />
-              <SymbolButton symbol="≤" title="Insert ≤" />
-              <SymbolButton symbol="<" title="Insert <" />
-              <SymbolButton symbol=">" title="Insert >" />
+              {/* Add Symbol Buttons */}
+              <SymbolButton symbol="≥" />
+              <SymbolButton symbol="≤" />
+              <SymbolButton symbol="<" />
+              <SymbolButton symbol=">" />
             </>
           ),
         }),

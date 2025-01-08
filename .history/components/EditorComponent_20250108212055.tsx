@@ -15,7 +15,7 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
+  TooltipWrap, // Импортируем TooltipWrap
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -39,6 +39,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
+  // Функция для вставки символа в позицию курсора
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
 
@@ -51,36 +52,28 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     }
   };
 
+  // Компонент кнопки с тултипом
   const SymbolButton = ({
     symbol,
-    title,
+    tooltip,
   }: {
     symbol: string;
-    title: string;
+    tooltip: string;
   }) => (
-    <ButtonWithTooltip
-      style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
-      }}
-      title={title}
-      onClick={() => insertSymbolAtCursor(symbol)}
-    >
-      <span
+    <TooltipWrap title={tooltip}>
+      <button
         style={{
-          fontSize: "24px", // Размер символа
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
-          borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
+          backgroundColor: "transparent",
+          border: "none",
+          cursor: "pointer",
+          padding: "5px",
+          fontSize: "24px", // Размер символа на кнопке
         }}
+        onClick={() => insertSymbolAtCursor(symbol)}
       >
         {symbol}
-      </span>
-    </ButtonWithTooltip>
+      </button>
+    </TooltipWrap>
   );
 
   return (
@@ -106,10 +99,11 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
-              <SymbolButton symbol="≥" title="Insert ≥" />
-              <SymbolButton symbol="≤" title="Insert ≤" />
-              <SymbolButton symbol="<" title="Insert <" />
-              <SymbolButton symbol=">" title="Insert >" />
+              {/* Добавляем кнопки с символами и тултипами */}
+              <SymbolButton symbol="≥" tooltip="Вставить ≥" />
+              <SymbolButton symbol="≤" tooltip="Вставить ≤" />
+              <SymbolButton symbol="<" tooltip="Вставить <" />
+              <SymbolButton symbol=">" tooltip="Вставить >" />
             </>
           ),
         }),

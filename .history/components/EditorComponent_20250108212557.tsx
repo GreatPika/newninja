@@ -15,7 +15,7 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
-  ButtonWithTooltip,
+  ButtonWithTooltip, // Импортируем ButtonWithTooltip
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -39,6 +39,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
+  // Функция для вставки символа в позицию курсора
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
 
@@ -51,6 +52,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     }
   };
 
+  // Компонент кнопки с тултипом
   const SymbolButton = ({
     symbol,
     title,
@@ -59,11 +61,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
     title: string;
   }) => (
     <ButtonWithTooltip
-      style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
-      }}
-      title={title}
+      title={title} // Используем title для тултипа
       onClick={() => insertSymbolAtCursor(symbol)}
     >
       <span
@@ -75,7 +73,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
           width: "28px", // Ширина кнопки
           height: "28px", // Высота кнопки
           borderRadius: "4px", // Небольшой радиус для скругления
-          color: "white", // Цвет символов
+
         }}
       >
         {symbol}
@@ -106,6 +104,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange }) => {
               <BoldItalicUnderlineToggles />
               <StrikeThroughSupSubToggles />
               <InsertTable />
+              {/* Добавляем кнопки с символами и тултипами */}
               <SymbolButton symbol="≥" title="Insert ≥" />
               <SymbolButton symbol="≤" title="Insert ≤" />
               <SymbolButton symbol="<" title="Insert <" />
