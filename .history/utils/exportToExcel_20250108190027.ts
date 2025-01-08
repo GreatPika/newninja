@@ -1,7 +1,5 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
-
 import { getAllMessages } from "./indexedDB";
 import { parseMarkdownTable } from "./parseMarkdownTable";
 
@@ -84,16 +82,6 @@ export const exportMessagesToExcel = async () => {
         const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
         mergedCell.value = lastValue;
-
-        // Объединяем ячейки в колонке F для объединенных ячеек в колонке C
-        if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = defaultAlignment;
-        }
       }
       mergeStart = row;
       lastValue = cellValue as string;
@@ -104,12 +92,24 @@ export const exportMessagesToExcel = async () => {
       const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
       mergedCell.value = lastValue;
+    }
+  }
 
-      // Объединяем ячейки в колонке F для последнего диапазона объединенных ячеек в колонке C
-      if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
-        const instructionCell = worksheet.getCell(`F${mergeStart}`);
+  // Удаляем последнюю строку перед обработкой колонки F
+  worksheet.spliceRows(currentRowNumber, 1);
 
+  // Обработка объединенных ячеек в колонке C
+  for (let row = 2; row < currentRowNumber; row++) {
+    const cellC = worksheet.getCell(`C${row}`);
+    const cellF = worksheet.getCell(`F${row}`);
+
+    if (cellC.isMerged && !cellF.isMerged) {
+      const mergeRange = cellC.master.address; // Получаем диапазон объединенных ячеек
+      const [startRow, endRow] = mergeRange.split(":").map((addr) => parseInt(addr.match(/\d+/)?.[0] || "0"));
+
+      if (startRow && endRow) {
+        worksheet.mergeCells(`F${startRow}:F${endRow}`);
+        const instructionCell = worksheet.getCell(`F${startRow}`);
         instructionCell.value =
           "Участник закупки указывает в заявке все значения характеристики";
         instructionCell.alignment = defaultAlignment;
@@ -118,7 +118,7 @@ export const exportMessagesToExcel = async () => {
   }
 
   // Обработка не объединенных ячеек
-  for (let row = 2; row <= currentRowNumber; row++) {
+  for (let row = 2; row < currentRowNumber; row++) {
     const cellC = worksheet.getCell(`C${row}`);
     const cellD = worksheet.getCell(`D${row}`);
     const cellF = worksheet.getCell(`F${row}`);
@@ -127,11 +127,9 @@ export const exportMessagesToExcel = async () => {
       const valueD = cellD.value.toString();
 
       if (!/[≥≤><]/.test(valueD)) {
-        cellF.value =
-          "Значение характеристики не может изменяться участником закупки";
+        cellF.value = "Значение характеристики не может изменяться участником закупки";
       } else {
-        cellF.value =
-          "Участник закупки указывает в заявке конкретное значение характеристики";
+        cellF.value = "Участник закупки указывает в заявке конкретное значение характеристики";
       }
     }
   }

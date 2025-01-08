@@ -1,7 +1,5 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
-
 import { getAllMessages } from "./indexedDB";
 import { parseMarkdownTable } from "./parseMarkdownTable";
 
@@ -15,7 +13,6 @@ export const exportMessagesToExcel = async () => {
     .reduce(
       async (tables, msg) => {
         const parsed = await parseMarkdownTable(msg.text);
-
         return parsed
           ? [...(await tables), { ...parsed, productName: msg.role }]
           : await tables;
@@ -39,10 +36,11 @@ export const exportMessagesToExcel = async () => {
       key: header,
       width: 30,
     })),
-    { header: "Инструкция", key: "instruction", width: 40 }, // Добавляем колонку "Инструкция"
+    { header: "Инструкция", key: "instruction", width: 50 }, // Добавляем колонку F
   ];
 
   let currentRowNumber = 2;
+  const mergeInfo: { startRow: number; endRow: number }[] = []; // Храним информацию об объединениях в колонке C
 
   resolvedTables.forEach((table, tableIndex) => {
     const startRow = currentRowNumber;
@@ -54,7 +52,6 @@ export const exportMessagesToExcel = async () => {
         ...Object.fromEntries(
           table.headers.map((header, i) => [header, row[i] || ""]),
         ),
-        instruction: "", // Инициализируем колонку "Инструкция" пустыми значениями
       });
       currentRowNumber++;
     });
@@ -72,6 +69,7 @@ export const exportMessagesToExcel = async () => {
     }
   });
 
+  // Объединение ячеек в колонке C и запись данных о диапазонах
   let mergeStart = 2;
   let lastValue = "";
 
@@ -81,19 +79,7 @@ export const exportMessagesToExcel = async () => {
     if (cellValue) {
       if (row - 1 >= mergeStart) {
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
-
-        // Объединяем ячейки в колонке F для объединенных ячеек в колонке C
-        if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = defaultAlignment;
-        }
+        mergeInfo.push({ startRow: mergeStart, endRow: row - 1 }); // Сохраняем диапазон объединения
       }
       mergeStart = row;
       lastValue = cellValue as string;
@@ -101,58 +87,60 @@ export const exportMessagesToExcel = async () => {
 
     if (row === currentRowNumber && lastValue && row > mergeStart) {
       worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-
-      // Объединяем ячейки в колонке F для последнего диапазона объединенных ячеек в колонке C
-      if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
-        const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-        instructionCell.value =
-          "Участник закупки указывает в заявке все значения характеристики";
-        instructionCell.alignment = defaultAlignment;
-      }
+      mergeInfo.push({ startRow: mergeStart, endRow: row }); // Сохраняем диапазон объединения
     }
   }
 
-  // Обработка не объединенных ячеек
+  worksheet.spliceRows(currentRowNumber, 1);
+
+  // Обработка объединенных диапазонов
+  mergeInfo.forEach(({ startRow, endRow }) => {
+    worksheet.mergeCells(`F${startRow}:F${endRow}`);
+    const mergedCellF = worksheet.getCell(`F${startRow}`);
+    mergedCellF.value =
+      "Участник закупки указывает в заявке все значения характеристики";
+  });
+
+  // Обработка строк, которые не объединены
   for (let row = 2; row <= currentRowNumber; row++) {
+    // Пропускаем строки, которые уже объединены
+    if (mergeInfo.some(({ startRow, endRow }) => row >= startRow && row <= endRow)) {
+      continue;
+    }
+
     const cellC = worksheet.getCell(`C${row}`);
     const cellD = worksheet.getCell(`D${row}`);
     const cellF = worksheet.getCell(`F${row}`);
 
-    if (!cellC.isMerged && cellC.value && cellD.value) {
-      const valueD = cellD.value.toString();
+    const valueC = cellC.value?.toString() || "";
+    const valueD = cellD.value?.toString() || "";
 
-      if (!/[≥≤><]/.test(valueD)) {
-        cellF.value =
-          "Значение характеристики не может изменяться участником закупки";
-      } else {
-        cellF.value =
-          "Участник закупки указывает в заявке конкретное значение характеристики";
-      }
+    // Обрабатываем строки по условиям
+    if (!/[≥≤><]/.test(valueC)) {
+      // Нет знаков сравнения в колонке C
+      cellF.value = "Значение характеристики не может изменяться участником закупки";
+    } else if (/[≥≤><]/.test(valueD)) {
+      // Есть знаки сравнения в колонке D
+      cellF.value = "Участник закупки указывает в заявке конкретное значение характеристики";
+    } else {
+      // По умолчанию
+      cellF.value = "Участник закупки указывает в заявке все значения характеристики";
     }
   }
 
-  const cellStyle = {
-    border: {
-      top: { style: "thin" },
-      bottom: { style: "thin" },
-      left: { style: "thin" },
-      right: { style: "thin" },
-    },
-    alignment: {
-      ...defaultAlignment,
-      wrapText: true,
-    },
-  };
-
-  worksheet.eachRow((row, rowNumber) => {
+  // Применяем стили к колонке F
+  worksheet.eachRow((row) => {
     row.eachCell((cell) => {
-      Object.assign(cell, cellStyle);
-      if (rowNumber === 1) {
+      Object.assign(cell, {
+        border: {
+          top: { style: "thin" },
+          bottom: { style: "thin" },
+          left: { style: "thin" },
+          right: { style: "thin" },
+        },
+        alignment: { ...defaultAlignment, wrapText: true },
+      });
+      if (row.number === 1) {
         cell.font = { bold: true };
         cell.alignment = { horizontal: "center" };
       }

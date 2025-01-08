@@ -1,9 +1,30 @@
 import type { Workbook, Worksheet } from "exceljs";
 
 import { saveAs } from "file-saver";
+import { marked } from "marked";
 
 import { getAllMessages } from "./indexedDB";
-import { parseMarkdownTable } from "./parseMarkdownTable";
+
+const parseMarkdownTable = async (markdown: string) => {
+  const html = await marked.parse(markdown);
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const table = doc.querySelector("table");
+
+  if (!table) return null;
+
+  const headers = Array.from(table.querySelectorAll("thead th")).map(
+    (th) => th.textContent?.trim() || "",
+  );
+
+  const rows = Array.from(table.querySelectorAll("tbody tr")).map((tr) =>
+    Array.from(tr.querySelectorAll("td")).map(
+      (td) => td.textContent?.trim() || "",
+    ),
+  );
+
+  return { headers, rows };
+};
 
 export const exportMessagesToExcel = async () => {
   const ExcelJS = await import("exceljs");
@@ -39,7 +60,7 @@ export const exportMessagesToExcel = async () => {
       key: header,
       width: 30,
     })),
-    { header: "Инструкция", key: "instruction", width: 40 }, // Добавляем колонку "Инструкция"
+    { header: "Инструкция", key: "instruction", width: 50 },
   ];
 
   let currentRowNumber = 2;
@@ -54,7 +75,7 @@ export const exportMessagesToExcel = async () => {
         ...Object.fromEntries(
           table.headers.map((header, i) => [header, row[i] || ""]),
         ),
-        instruction: "", // Инициализируем колонку "Инструкция" пустыми значениями
+        instruction: "", // Будет заполнено ниже
       });
       currentRowNumber++;
     });
@@ -76,65 +97,46 @@ export const exportMessagesToExcel = async () => {
   let lastValue = "";
 
   for (let row = 2; row <= currentRowNumber; row++) {
-    const cellValue = worksheet.getCell(`C${row}`).value;
+    const colCValue = worksheet.getCell(`C${row}`).value?.toString() || "";
+    const colDValue = worksheet.getCell(`D${row}`).value?.toString() || "";
 
-    if (cellValue) {
+    // Проверка объединенных значений в колонке C
+    if (lastValue !== colCValue) {
       if (row - 1 >= mergeStart) {
-        worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
-
-        // Объединяем ячейки в колонке F для объединенных ячеек в колонке C
-        if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = defaultAlignment;
-        }
+        // Объединение и заполнение ячеек в колонке F
+        worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
+        worksheet.getCell(`F${mergeStart}`).value =
+          "Участник закупки указывает в заявке все значения характеристики";
       }
       mergeStart = row;
-      lastValue = cellValue as string;
+      lastValue = colCValue;
     }
 
-    if (row === currentRowNumber && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-
-      // Объединяем ячейки в колонке F для последнего диапазона объединенных ячеек в колонке C
-      if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
-        const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-        instructionCell.value =
-          "Участник закупки указывает в заявке все значения характеристики";
-        instructionCell.alignment = defaultAlignment;
-      }
+    // Если это последняя строка и объединение все еще актуально
+    if (row === currentRowNumber && mergeStart < row) {
+      worksheet.mergeCells(`F${mergeStart}:F${row}`);
+      worksheet.getCell(`F${mergeStart}`).value =
+        "Участник закупки указывает в заявке все значения характеристики";
     }
-  }
 
-  // Обработка не объединенных ячеек
-  for (let row = 2; row <= currentRowNumber; row++) {
-    const cellC = worksheet.getCell(`C${row}`);
-    const cellD = worksheet.getCell(`D${row}`);
-    const cellF = worksheet.getCell(`F${row}`);
-
-    if (!cellC.isMerged && cellC.value && cellD.value) {
-      const valueD = cellD.value.toString();
-
-      if (!/[≥≤><]/.test(valueD)) {
-        cellF.value =
+    // Заполнение не объединенных строк
+    if (!worksheet.getCell(`C${row}`).isMerged) {
+      if (
+        colCValue &&
+        colDValue &&
+        !/[≥≤><]/.test(colCValue) &&
+        !/[≥≤><]/.test(colDValue)
+      ) {
+        worksheet.getCell(`F${row}`).value =
           "Значение характеристики не может изменяться участником закупки";
-      } else {
-        cellF.value =
+      } else if (/[≥≤><]/.test(colDValue)) {
+        worksheet.getCell(`F${row}`).value =
           "Участник закупки указывает в заявке конкретное значение характеристики";
       }
     }
   }
+
+  worksheet.spliceRows(currentRowNumber, 1);
 
   const cellStyle = {
     border: {
@@ -166,3 +168,4 @@ export const exportMessagesToExcel = async () => {
 
   saveAs(blob, "Новый.xlsx");
 };
+

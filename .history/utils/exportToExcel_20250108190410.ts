@@ -136,6 +136,8 @@ export const exportMessagesToExcel = async () => {
     }
   }
 
+  worksheet.spliceRows(currentRowNumber, 1);
+
   const cellStyle = {
     border: {
       top: { style: "thin" },

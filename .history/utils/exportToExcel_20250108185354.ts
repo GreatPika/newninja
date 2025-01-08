@@ -1,7 +1,5 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
-
 import { getAllMessages } from "./indexedDB";
 import { parseMarkdownTable } from "./parseMarkdownTable";
 
@@ -89,7 +87,6 @@ export const exportMessagesToExcel = async () => {
         if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
           worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
           const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
           instructionCell.value =
             "Участник закупки указывает в заявке все значения характеристики";
           instructionCell.alignment = defaultAlignment;
@@ -109,7 +106,6 @@ export const exportMessagesToExcel = async () => {
       if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
         worksheet.mergeCells(`F${mergeStart}:F${row}`);
         const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
         instructionCell.value =
           "Участник закупки указывает в заявке все значения характеристики";
         instructionCell.alignment = defaultAlignment;
@@ -127,14 +123,14 @@ export const exportMessagesToExcel = async () => {
       const valueD = cellD.value.toString();
 
       if (!/[≥≤><]/.test(valueD)) {
-        cellF.value =
-          "Значение характеристики не может изменяться участником закупки";
+        cellF.value = "Значение характеристики не может изменяться участником закупки";
       } else {
-        cellF.value =
-          "Участник закупки указывает в заявке конкретное значение характеристики";
+        cellF.value = "Участник закупки указывает в заявке конкретное значение характеристики";
       }
     }
   }
+
+  worksheet.spliceRows(currentRowNumber, 1);
 
   const cellStyle = {
     border: {

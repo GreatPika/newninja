@@ -26,6 +26,7 @@
 		"@react-aria/visually-hidden": "3.8.12",
 		"@supabase/supabase-js": "^2.46.1",
 		"clsx": "2.1.1",
+		"docx": "^9.1.0",
 		"event-source-polyfill": "^1.0.31",
 		"exceljs": "^4.4.0",
 		"file-saver": "^2.0.5",

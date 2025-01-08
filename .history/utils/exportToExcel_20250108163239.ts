@@ -3,7 +3,7 @@ import type { Workbook, Worksheet } from "exceljs";
 import { saveAs } from "file-saver";
 
 import { getAllMessages } from "./indexedDB";
-import { parseMarkdownTable } from "./parseMarkdownTable";
+import { parseMarkdownTable } from "./parseMarkdownTable"; // Импортируем функцию
 
 export const exportMessagesToExcel = async () => {
   const ExcelJS = await import("exceljs");
@@ -39,7 +39,6 @@ export const exportMessagesToExcel = async () => {
       key: header,
       width: 30,
     })),
-    { header: "Инструкция", key: "instruction", width: 40 }, // Добавляем колонку "Инструкция"
   ];
 
   let currentRowNumber = 2;
@@ -54,7 +53,6 @@ export const exportMessagesToExcel = async () => {
         ...Object.fromEntries(
           table.headers.map((header, i) => [header, row[i] || ""]),
         ),
-        instruction: "", // Инициализируем колонку "Инструкция" пустыми значениями
       });
       currentRowNumber++;
     });
@@ -84,16 +82,6 @@ export const exportMessagesToExcel = async () => {
         const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
         mergedCell.value = lastValue;
-
-        // Объединяем ячейки в колонке F для объединенных ячеек в колонке C
-        if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = defaultAlignment;
-        }
       }
       mergeStart = row;
       lastValue = cellValue as string;
@@ -104,37 +92,10 @@ export const exportMessagesToExcel = async () => {
       const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
       mergedCell.value = lastValue;
-
-      // Объединяем ячейки в колонке F для последнего диапазона объединенных ячеек в колонке C
-      if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
-        const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-        instructionCell.value =
-          "Участник закупки указывает в заявке все значения характеристики";
-        instructionCell.alignment = defaultAlignment;
-      }
     }
   }
 
-  // Обработка не объединенных ячеек
-  for (let row = 2; row <= currentRowNumber; row++) {
-    const cellC = worksheet.getCell(`C${row}`);
-    const cellD = worksheet.getCell(`D${row}`);
-    const cellF = worksheet.getCell(`F${row}`);
-
-    if (!cellC.isMerged && cellC.value && cellD.value) {
-      const valueD = cellD.value.toString();
-
-      if (!/[≥≤><]/.test(valueD)) {
-        cellF.value =
-          "Значение характеристики не может изменяться участником закупки";
-      } else {
-        cellF.value =
-          "Участник закупки указывает в заявке конкретное значение характеристики";
-      }
-    }
-  }
+  worksheet.spliceRows(currentRowNumber, 1);
 
   const cellStyle = {
     border: {
