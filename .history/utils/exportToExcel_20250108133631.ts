@@ -1,26 +1,25 @@
 import type { Workbook, Worksheet } from "exceljs";
 
 import { saveAs } from "file-saver";
-import { marked } from "marked";
 
 import { getAllMessages } from "./indexedDB";
 
-const parseMarkdownTable = async (markdown: string) => {
-  const html = await marked.parse(markdown);
+import { marked } from "marked";
+
+const parseMarkdownTable = (markdown: string) => {
+  const html = marked.parse(markdown);
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
   const table = doc.querySelector("table");
 
   if (!table) return null;
 
-  const headers = Array.from(table.querySelectorAll("thead th")).map(
-    (th) => th.textContent?.trim() || "",
+  const headers = Array.from(table.querySelectorAll("thead th")).map((th) =>
+    th.textContent?.trim() || ""
   );
 
   const rows = Array.from(table.querySelectorAll("tbody tr")).map((tr) =>
-    Array.from(tr.querySelectorAll("td")).map(
-      (td) => td.textContent?.trim() || "",
-    ),
+    Array.from(tr.querySelectorAll("td")).map((td) => td.textContent?.trim() || "")
   );
 
   return { headers, rows };
@@ -34,28 +33,24 @@ export const exportMessagesToExcel = async () => {
   const allTables = (await getAllMessages())
     .filter((msg) => msg.role !== "user")
     .reduce(
-      async (tables, msg) => {
-        const parsed = await parseMarkdownTable(msg.text);
+      (tables, msg) => {
+        const parsed = parseMarkdownTable(msg.text);
 
         return parsed
-          ? [...(await tables), { ...parsed, productName: msg.role }]
-          : await tables;
+          ? [...tables, { ...parsed, productName: msg.role }]
+          : tables;
       },
-      Promise.resolve([]) as Promise<
-        { headers: string[]; rows: string[][]; productName: string }[]
-      >,
+      [] as { headers: string[]; rows: string[][]; productName: string }[],
     );
 
-  const resolvedTables = await allTables;
-
-  if (resolvedTables.length === 0) return;
+  if (allTables.length === 0) return;
 
   const defaultAlignment = { vertical: "top", horizontal: "center" } as const;
 
   worksheet.columns = [
     { header: "№ п.п", key: "number", width: 10 },
     { header: "Наименование товара", key: "productName", width: 30 },
-    ...resolvedTables[0].headers.map((header) => ({
+    ...allTables[0].headers.map((header) => ({
       header,
       key: header,
       width: 30,
@@ -64,7 +59,7 @@ export const exportMessagesToExcel = async () => {
 
   let currentRowNumber = 2;
 
-  resolvedTables.forEach((table, tableIndex) => {
+  allTables.forEach((table, tableIndex) => {
     const startRow = currentRowNumber;
 
     table.rows.forEach((row) => {

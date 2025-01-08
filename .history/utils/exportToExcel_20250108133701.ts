@@ -1,9 +1,10 @@
 import type { Workbook, Worksheet } from "exceljs";
 
 import { saveAs } from "file-saver";
-import { marked } from "marked";
 
 import { getAllMessages } from "./indexedDB";
+
+import { marked } from "marked";
 
 const parseMarkdownTable = async (markdown: string) => {
   const html = await marked.parse(markdown);
@@ -13,14 +14,12 @@ const parseMarkdownTable = async (markdown: string) => {
 
   if (!table) return null;
 
-  const headers = Array.from(table.querySelectorAll("thead th")).map(
-    (th) => th.textContent?.trim() || "",
+  const headers = Array.from(table.querySelectorAll("thead th")).map((th) =>
+    th.textContent?.trim() || ""
   );
 
   const rows = Array.from(table.querySelectorAll("tbody tr")).map((tr) =>
-    Array.from(tr.querySelectorAll("td")).map(
-      (td) => td.textContent?.trim() || "",
-    ),
+    Array.from(tr.querySelectorAll("td")).map((td) => td.textContent?.trim() || "")
   );
 
   return { headers, rows };
@@ -41,9 +40,7 @@ export const exportMessagesToExcel = async () => {
           ? [...(await tables), { ...parsed, productName: msg.role }]
           : await tables;
       },
-      Promise.resolve([]) as Promise<
-        { headers: string[]; rows: string[][]; productName: string }[]
-      >,
+      Promise.resolve([]) as Promise<{ headers: string[]; rows: string[][]; productName: string }[]>,
     );
 
   const resolvedTables = await allTables;
