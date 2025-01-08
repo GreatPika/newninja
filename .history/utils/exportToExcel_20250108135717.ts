@@ -60,6 +60,7 @@ export const exportMessagesToExcel = async () => {
       key: header,
       width: 30,
     })),
+    { header: "Инструкция", key: "instruction", width: 50 },
   ];
 
   let currentRowNumber = 2;
@@ -68,12 +69,15 @@ export const exportMessagesToExcel = async () => {
     const startRow = currentRowNumber;
 
     table.rows.forEach((row) => {
+      const instruction = getInstruction(row[0], row[1]);
+
       worksheet.addRow({
         number: tableIndex + 1,
         productName: table.productName,
         ...Object.fromEntries(
           table.headers.map((header, i) => [header, row[i] || ""]),
         ),
+        instruction,
       });
       currentRowNumber++;
     });
@@ -97,26 +101,26 @@ export const exportMessagesToExcel = async () => {
   for (let row = 2; row <= currentRowNumber; row++) {
     const cellValue = worksheet.getCell(`C${row}`).value;
 
-    if (cellValue) {
-      if (row - 1 >= mergeStart) {
+    if (cellValue && lastValue === "") {
+      if (row - 1 > mergeStart) {
+        // Merge cells in column C
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
+        // Merge cells in column F (Instruction)
+        worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
       }
       mergeStart = row;
-      lastValue = cellValue as string;
+    } else if (!cellValue && lastValue) {
+      mergeStart = row;
     }
 
-    if (row === currentRowNumber && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-    }
+    lastValue = cellValue as string;
   }
 
-  worksheet.spliceRows(currentRowNumber, 1);
+  // Final merge for remaining rows
+  if (lastValue === "" && currentRowNumber > mergeStart) {
+    worksheet.mergeCells(`C${mergeStart}:C${currentRowNumber - 1}`);
+    worksheet.mergeCells(`F${mergeStart}:F${currentRowNumber - 1}`);
+  }
 
   const cellStyle = {
     border: {
@@ -148,3 +152,15 @@ export const exportMessagesToExcel = async () => {
 
   saveAs(blob, "Новый.xlsx");
 };
+
+function getInstruction(valueC: string, valueD: string): string {
+  if (valueC && valueD) {
+    if (!/[≥≤><]/.test(valueC) && !/[≥≤><]/.test(valueD)) {
+      return "Значение характеристики не может изменяться участником закупки";
+    } else if (/[≥≤><]/.test(valueD)) {
+      return "Участник закупки указывает в заявке конкретное значение характеристики";
+    }
+  }
+
+  return "Участник закупки указывает в заявке все значения характеристики";
+}

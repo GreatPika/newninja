@@ -101,7 +101,6 @@ export const exportMessagesToExcel = async () => {
       if (row - 1 >= mergeStart) {
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
         const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
         mergedCell.value = lastValue;
       }
       mergeStart = row;
@@ -111,12 +110,9 @@ export const exportMessagesToExcel = async () => {
     if (row === currentRowNumber && lastValue && row > mergeStart) {
       worksheet.mergeCells(`C${mergeStart}:C${row}`);
       const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
       mergedCell.value = lastValue;
     }
   }
-
-  worksheet.spliceRows(currentRowNumber, 1);
 
   const cellStyle = {
     border: {

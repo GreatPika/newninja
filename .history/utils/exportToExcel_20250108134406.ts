@@ -60,6 +60,7 @@ export const exportMessagesToExcel = async () => {
       key: header,
       width: 30,
     })),
+    { header: "Инструкция", key: "instruction", width: 50 },
   ];
 
   let currentRowNumber = 2;
@@ -68,12 +69,14 @@ export const exportMessagesToExcel = async () => {
     const startRow = currentRowNumber;
 
     table.rows.forEach((row) => {
+      const instruction = determineInstruction(row, table.headers);
       worksheet.addRow({
         number: tableIndex + 1,
         productName: table.productName,
         ...Object.fromEntries(
           table.headers.map((header, i) => [header, row[i] || ""]),
         ),
+        instruction,
       });
       currentRowNumber++;
     });
@@ -97,26 +100,21 @@ export const exportMessagesToExcel = async () => {
   for (let row = 2; row <= currentRowNumber; row++) {
     const cellValue = worksheet.getCell(`C${row}`).value;
 
-    if (cellValue) {
-      if (row - 1 >= mergeStart) {
+    if (cellValue && lastValue === "") {
+      if (row - 1 > mergeStart) {
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
       }
       mergeStart = row;
-      lastValue = cellValue as string;
+    } else if (!cellValue && lastValue) {
+      mergeStart = row;
     }
 
-    if (row === currentRowNumber && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-    }
+    lastValue = cellValue as string;
   }
 
-  worksheet.spliceRows(currentRowNumber, 1);
+  if (lastValue === "" && currentRowNumber > mergeStart) {
+    worksheet.mergeCells(`C${mergeStart}:C${currentRowNumber - 1}`);
+  }
 
   const cellStyle = {
     border: {
@@ -148,3 +146,23 @@ export const exportMessagesToExcel = async () => {
 
   saveAs(blob, "Новый.xlsx");
 };
+
+function determineInstruction(row: string[], headers: string[]): string {
+  const indexC = headers.indexOf("C");
+  const indexD = headers.indexOf("D");
+
+  if (indexC === -1 || indexD === -1) return "";
+
+  const valueC = row[indexC] || "";
+  const valueD = row[indexD] || "";
+
+  if (valueC && valueD) {
+    if (!/[≥≤><]/.test(valueC) && !/[≥≤><]/.test(valueD)) {
+      return "Значение характеристики не может изменяться участником закупки";
+    } else if (/[≥≤><]/.test(valueD)) {
+      return "Участник закупки указывает в заявке конкретное значение характеристики";
+    }
+  }
+
+  return "";
+}

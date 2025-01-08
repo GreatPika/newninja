@@ -97,26 +97,21 @@ export const exportMessagesToExcel = async () => {
   for (let row = 2; row <= currentRowNumber; row++) {
     const cellValue = worksheet.getCell(`C${row}`).value;
 
-    if (cellValue) {
-      if (row - 1 >= mergeStart) {
+    if (cellValue && lastValue === "") {
+      if (row - 1 > mergeStart) {
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
       }
       mergeStart = row;
-      lastValue = cellValue as string;
+    } else if (!cellValue && lastValue) {
+      mergeStart = row;
     }
 
-    if (row === currentRowNumber && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-    }
+    lastValue = cellValue as string;
   }
 
-  worksheet.spliceRows(currentRowNumber, 1);
+  if (lastValue === "" && currentRowNumber > mergeStart) {
+    worksheet.mergeCells(`C${mergeStart}:C${currentRowNumber - 1}`);
+  }
 
   const cellStyle = {
     border: {

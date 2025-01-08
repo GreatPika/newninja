@@ -1,8 +1,6 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
 import { marked } from "marked";
-
 import { getAllMessages } from "./indexedDB";
 
 const parseMarkdownTable = async (markdown: string) => {
@@ -95,28 +93,29 @@ export const exportMessagesToExcel = async () => {
   let lastValue = "";
 
   for (let row = 2; row <= currentRowNumber; row++) {
-    const cellValue = worksheet.getCell(`C${row}`).value;
+    const cell = worksheet.getCell(`C${row}`);
+    const cellValue = cell.value as string;
 
     if (cellValue) {
-      if (row - 1 >= mergeStart) {
-        worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-        mergedCell.value = lastValue;
+      if (lastValue === "") {
+        if (row - 1 > mergeStart) {
+          worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
+          const mergedCell = worksheet.getCell(`C${mergeStart}`);
+          mergedCell.value = lastValue;
+        }
+        mergeStart = row;
       }
-      mergeStart = row;
-      lastValue = cellValue as string;
+      lastValue = cellValue;
+    } else if (lastValue) {
+      cell.value = lastValue;
     }
 
-    if (row === currentRowNumber && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
+    if (!cellValue && row === currentRowNumber && lastValue) {
+      worksheet.mergeCells(`C${mergeStart}:C${currentRowNumber}`);
       const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
       mergedCell.value = lastValue;
     }
   }
-
-  worksheet.spliceRows(currentRowNumber, 1);
 
   const cellStyle = {
     border: {
