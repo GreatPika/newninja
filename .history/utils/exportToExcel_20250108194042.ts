@@ -1,7 +1,5 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
-
 import { getAllMessages } from "./indexedDB";
 import { parseMarkdownTable } from "./parseMarkdownTable";
 
@@ -28,6 +26,23 @@ export const exportMessagesToExcel = async () => {
   const resolvedTables = await allTables;
 
   if (resolvedTables.length === 0) return;
+
+  const topAlignment = { vertical: "top", horizontal: "center" } as const;
+  const middleAlignment = { vertical: "middle", horizontal: "center" } as const;
+
+  const mergeCellsInColumn = (
+    sheet: Worksheet,
+    column: string,
+    startRow: number,
+    endRow: number,
+    value: any,
+    alignment: { vertical: "top" | "middle"; horizontal: "center" },
+  ) => {
+    sheet.mergeCells(`${column}${startRow}:${column}${endRow}`);
+    const cell = sheet.getCell(`${column}${startRow}`);
+    cell.value = value;
+    cell.alignment = alignment;
+  };
 
   worksheet.columns = [
     { header: "№ п.п", key: "number", width: 10 },
@@ -58,21 +73,22 @@ export const exportMessagesToExcel = async () => {
     });
 
     if (startRow < currentRowNumber) {
-      // Объединение ячеек в колонках A и B для каждой таблицы
       ["A", "B"].forEach((col) => {
-        worksheet.mergeCells(`${col}${startRow}:${col}${currentRowNumber - 1}`);
-        const cell = worksheet.getCell(`${col}${startRow}`);
-
-        cell.alignment =
-          col === "B"
-            ? { vertical: "middle", horizontal: "center" }
-            : { vertical: "top", horizontal: "center" };
+        mergeCellsInColumn(
+          worksheet,
+          col,
+          startRow,
+          currentRowNumber - 1,
+          worksheet.getCell(`${col}${startRow}`).value,
+          col === "B" ? middleAlignment : topAlignment,
+        );
       });
     }
   });
 
   let mergeStart = 2;
   let lastValue = "";
+
   const lastDataRow = currentRowNumber - 1;
 
   for (let row = 2; row <= lastDataRow; row++) {
@@ -80,17 +96,24 @@ export const exportMessagesToExcel = async () => {
 
     if (cellValue) {
       if (row - 1 >= mergeStart) {
-        worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
-        const mergedCell = worksheet.getCell(`C${mergeStart}`);
+        mergeCellsInColumn(
+          worksheet,
+          "C",
+          mergeStart,
+          row - 1,
+          lastValue,
+          topAlignment,
+        );
 
-        mergedCell.value = lastValue;
         if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = { vertical: "top", horizontal: "center" };
+          mergeCellsInColumn(
+            worksheet,
+            "F",
+            mergeStart,
+            row - 1,
+            "Участник закупки указывает в заявке все значения характеристики",
+            topAlignment,
+          );
         }
       }
       mergeStart = row;
@@ -98,17 +121,24 @@ export const exportMessagesToExcel = async () => {
     }
 
     if (row === lastDataRow && lastValue && row > mergeStart) {
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
+      mergeCellsInColumn(
+        worksheet,
+        "C",
+        mergeStart,
+        row,
+        lastValue,
+        topAlignment,
+      );
 
-      mergedCell.value = lastValue;
       if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
-        const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-        instructionCell.value =
-          "Участник закупки указывает в заявке все значения характеристики";
-        instructionCell.alignment = { vertical: "top", horizontal: "center" };
+        mergeCellsInColumn(
+          worksheet,
+          "F",
+          mergeStart,
+          row,
+          "Участник закупки указывает в заявке все значения характеристики",
+          topAlignment,
+        );
       }
     }
   }
@@ -120,7 +150,6 @@ export const exportMessagesToExcel = async () => {
 
     if (!cellC.isMerged && cellC.value && cellD.value) {
       const valueD = cellD.value.toString();
-
       cellF.value = !/[≥≤><]/.test(valueD)
         ? "Значение характеристики не может изменяться участником закупки"
         : "Участник закупки указывает в заявке конкретное значение характеристики";
@@ -135,8 +164,7 @@ export const exportMessagesToExcel = async () => {
       right: { style: "thin" },
     },
     alignment: {
-      vertical: "top",
-      horizontal: "center",
+      ...topAlignment,
       wrapText: true,
     },
   };
