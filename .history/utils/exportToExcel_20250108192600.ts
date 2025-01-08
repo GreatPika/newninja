@@ -75,15 +75,11 @@ export const exportMessagesToExcel = async () => {
   let mergeStart = 2;
   let lastValue = "";
 
-  // Определяем последнюю строку с данными
-  const lastDataRow = currentRowNumber - 1;
-
-  for (let row = 2; row <= lastDataRow; row++) {
+  for (let row = 2; row <= currentRowNumber; row++) {
     const cellValue = worksheet.getCell(`C${row}`).value;
 
     if (cellValue) {
       if (row - 1 >= mergeStart) {
-        // Объединяем ячейки в колонке C
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
         const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
@@ -103,8 +99,7 @@ export const exportMessagesToExcel = async () => {
       lastValue = cellValue as string;
     }
 
-    if (row === lastDataRow && lastValue && row > mergeStart) {
-      // Объединяем ячейки в колонке C для последнего диапазона
+    if (row === currentRowNumber && lastValue && row > mergeStart) {
       worksheet.mergeCells(`C${mergeStart}:C${row}`);
       const mergedCell = worksheet.getCell(`C${mergeStart}`);
 
@@ -123,7 +118,7 @@ export const exportMessagesToExcel = async () => {
   }
 
   // Обработка не объединенных ячеек
-  for (let row = 2; row <= lastDataRow; row++) {
+  for (let row = 2; row <= currentRowNumber; row++) {
     const cellC = worksheet.getCell(`C${row}`);
     const cellD = worksheet.getCell(`D${row}`);
     const cellF = worksheet.getCell(`F${row}`);

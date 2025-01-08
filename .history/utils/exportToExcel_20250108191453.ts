@@ -1,7 +1,5 @@
 import type { Workbook, Worksheet } from "exceljs";
-
 import { saveAs } from "file-saver";
-
 import { getAllMessages } from "./indexedDB";
 import { parseMarkdownTable } from "./parseMarkdownTable";
 
@@ -44,6 +42,7 @@ export const exportMessagesToExcel = async () => {
 
   let currentRowNumber = 2;
 
+  // Добавляем строки в таблицу и отслеживаем последнюю строку с данными
   resolvedTables.forEach((table, tableIndex) => {
     const startRow = currentRowNumber;
 
@@ -72,58 +71,47 @@ export const exportMessagesToExcel = async () => {
     }
   });
 
+  // Логика объединения ячеек в колонках C и F
   let mergeStart = 2;
-  let lastValue = "";
+  let lastValue = worksheet.getCell(`C${mergeStart}`).value;
 
-  // Определяем последнюю строку с данными
-  const lastDataRow = currentRowNumber - 1;
+  for (let row = mergeStart + 1; row <= currentRowNumber; row++) {
+    const currentValue = worksheet.getCell(`C${row}`).value;
 
-  for (let row = 2; row <= lastDataRow; row++) {
-    const cellValue = worksheet.getCell(`C${row}`).value;
-
-    if (cellValue) {
-      if (row - 1 >= mergeStart) {
+    if (currentValue !== lastValue) {
+      if (row - 1 > mergeStart) {
         // Объединяем ячейки в колонке C
         worksheet.mergeCells(`C${mergeStart}:C${row - 1}`);
         const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
         mergedCell.value = lastValue;
 
-        // Объединяем ячейки в колонке F для объединенных ячеек в колонке C
-        if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-          worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
-          const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
-          instructionCell.value =
-            "Участник закупки указывает в заявке все значения характеристики";
-          instructionCell.alignment = defaultAlignment;
-        }
-      }
-      mergeStart = row;
-      lastValue = cellValue as string;
-    }
-
-    if (row === lastDataRow && lastValue && row > mergeStart) {
-      // Объединяем ячейки в колонке C для последнего диапазона
-      worksheet.mergeCells(`C${mergeStart}:C${row}`);
-      const mergedCell = worksheet.getCell(`C${mergeStart}`);
-
-      mergedCell.value = lastValue;
-
-      // Объединяем ячейки в колонке F для последнего диапазона объединенных ячеек в колонке C
-      if (!worksheet.getCell(`F${mergeStart}`).isMerged) {
-        worksheet.mergeCells(`F${mergeStart}:F${row}`);
+        // Объединяем ячейки в колонке F
+        worksheet.mergeCells(`F${mergeStart}:F${row - 1}`);
         const instructionCell = worksheet.getCell(`F${mergeStart}`);
-
         instructionCell.value =
           "Участник закупки указывает в заявке все значения характеристики";
         instructionCell.alignment = defaultAlignment;
       }
+      mergeStart = row;
+      lastValue = currentValue;
     }
   }
 
+  // Обработка последнего диапазона объединения
+  if (mergeStart < currentRowNumber) {
+    worksheet.mergeCells(`C${mergeStart}:C${currentRowNumber}`);
+    const mergedCell = worksheet.getCell(`C${mergeStart}`);
+    mergedCell.value = lastValue;
+
+    worksheet.mergeCells(`F${mergeStart}:F${currentRowNumber}`);
+    const instructionCell = worksheet.getCell(`F${mergeStart}`);
+    instructionCell.value =
+      "Участник закупки указывает в заявке все значения характеристики";
+    instructionCell.alignment = defaultAlignment;
+  }
+
   // Обработка не объединенных ячеек
-  for (let row = 2; row <= lastDataRow; row++) {
+  for (let row = 2; row <= currentRowNumber; row++) {
     const cellC = worksheet.getCell(`C${row}`);
     const cellD = worksheet.getCell(`D${row}`);
     const cellF = worksheet.getCell(`F${row}`);
@@ -141,6 +129,7 @@ export const exportMessagesToExcel = async () => {
     }
   }
 
+  // Применение стилей к ячейкам
   const cellStyle = {
     border: {
       top: { style: "thin" },
@@ -164,6 +153,7 @@ export const exportMessagesToExcel = async () => {
     });
   });
 
+  // Сохранение файла
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
