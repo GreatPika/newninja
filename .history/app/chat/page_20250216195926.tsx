@@ -16,8 +16,8 @@ export default function HomePage() {
       <div className="h-full">
         <NavBar />
         <ChatContainer
-          baseURL="https://api.tenderninja.co"
-          //baseURL="http://127.0.0.1:8000"
+          //baseURL="https://api.tenderninja.co"
+          baseURL="http://127.0.0.1:8000"
           emptyStateMessage={emptyStateMessage}
         />
       </div>
