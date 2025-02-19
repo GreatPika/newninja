@@ -79,12 +79,7 @@ export default function EditPage() {
   return (
     <div style={{ height: "100vh", overflow: "hidden" }}>
       <PanelGroup direction="vertical">
-        <Panel
-          defaultSize={70}
-          maxSize={90}
-          minSize={10}
-          style={{ overflow: "auto" }}
-        >
+        <Panel defaultSize={70} maxSize={90} minSize={10} style={{ overflow: "auto" }}>
           <div style={{ height: "100%" }}>
             <Editor
               key={markdown}
@@ -94,12 +89,7 @@ export default function EditPage() {
           </div>
         </Panel>
         <PanelResizeHandle className="resize-handle" />
-        <Panel
-          defaultSize={30}
-          maxSize={90}
-          minSize={10}
-          style={{ overflow: "auto" }}
-        >
+        <Panel defaultSize={30} maxSize={90} minSize={10} style={{ overflow: "auto" }}>
           <div style={{ height: "100%" }}>
             <Editor
               markdown={previousUserMessage}

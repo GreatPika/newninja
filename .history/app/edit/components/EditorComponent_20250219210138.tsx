@@ -32,12 +32,7 @@ interface EditorProps {
   showToolbar?: boolean;
 }
 
-const Editor: FC<EditorProps> = ({
-  markdown,
-  editorRef,
-  onContentChange,
-  showToolbar = true,
-}) => {
+const Editor: FC<EditorProps> = ({ markdown, editorRef, onContentChange, showToolbar = true }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
 
@@ -105,24 +100,22 @@ const Editor: FC<EditorProps> = ({
         thematicBreakPlugin(),
         frontmatterPlugin(),
         markdownShortcutPlugin(),
-        ...(showToolbar
-          ? [
-              toolbarPlugin({
-                toolbarContents: () => (
-                  <>
-                    <UndoRedo />
-                    <BoldItalicUnderlineToggles />
-                    <StrikeThroughSupSubToggles />
-                    <InsertTable />
-                    <SymbolButton symbol="≥" title="Insert ≥" />
-                    <SymbolButton symbol="≤" title="Insert ≤" />
-                    <SymbolButton symbol=">" title="Insert >" />
-                    <SymbolButton symbol="<" title="Insert <" />
-                  </>
-                ),
-              }),
-            ]
-          : []),
+        ...(showToolbar ? [
+          toolbarPlugin({
+            toolbarContents: () => (
+              <>
+                <UndoRedo />
+                <BoldItalicUnderlineToggles />
+                <StrikeThroughSupSubToggles />
+                <InsertTable />
+                <SymbolButton symbol="≥" title="Insert ≥" />
+                <SymbolButton symbol="≤" title="Insert ≤" />
+                <SymbolButton symbol=">" title="Insert >" />
+                <SymbolButton symbol="<" title="Insert <" />
+              </>
+            ),
+          })
+        ] : [])
       ]}
       onChange={onContentChange}
     />
