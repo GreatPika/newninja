@@ -25,3 +25,26 @@
   background: rgba(128, 128, 128, 0.4);
   border-radius: 1px;
 }
+
+.resize-handle-vertical {
+  width: 4px;
+  background: rgba(128, 128, 128, 0.2);
+  cursor: col-resize;
+  transition: background 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.resize-handle-vertical:hover {
+  background: rgba(128, 128, 128, 0.3);
+}
+
+/* Опционально: добавить визуальный индикатор */
+.resize-handle-vertical::after {
+  content: "";
+  height: 40px;
+  width: 2px;
+  background: rgba(128, 128, 128, 0.4);
+  border-radius: 1px;
+}

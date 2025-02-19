@@ -4,13 +4,8 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-
-import {
-  updateMessage,
-  getMessageById,
-  getAllMessages,
-} from "@/utils/indexedDB";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { updateMessage, getMessageById } from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
@@ -19,7 +14,6 @@ const Editor = dynamic(() => import("@/components/EditorComponent"), {
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
-  const [previousUserMessage, setPreviousUserMessage] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
   const params = useParams();
   const messageId =
@@ -30,24 +24,7 @@ export default function EditPage() {
       if (!messageId) return;
 
       try {
-        // Получаем текущее сообщение
         const message = await getMessageById(messageId);
-
-        // Получаем все сообщения
-        const allMessages = await getAllMessages();
-
-        // Находим индекс текущего сообщения
-        const currentIndex = allMessages.findIndex(
-          (msg) => msg.id === messageId,
-        );
-
-        // Ищем предыдущее сообщение с ролью user
-        for (let i = currentIndex - 1; i >= 0; i--) {
-          if (allMessages[i].role === "user") {
-            setPreviousUserMessage(allMessages[i].text);
-            break;
-          }
-        }
 
         if (message) {
           setMarkdown(message.text);
@@ -79,16 +56,26 @@ export default function EditPage() {
   return (
     <div style={{ height: "100vh" }}>
       <PanelGroup direction="vertical">
-        <Panel defaultSize={70} maxSize={90} minSize={10}>
+        <Panel defaultSize={50} maxSize={90} minSize={10}>
           <Editor
-            key={markdown}
+            key={`table-${markdown}`}
             markdown={markdown}
             onContentChange={handleContentChange}
           />
         </Panel>
-        <PanelResizeHandle className="resize-handle" />
-        <Panel defaultSize={30} maxSize={90} minSize={10}>
-          <Editor markdown={previousUserMessage} onContentChange={() => {}} />
+        <PanelResizeHandle
+          style={{
+            height: "8px",
+            backgroundColor: "var(--nextui-colors-border)",
+            cursor: "row-resize",
+          }}
+        />
+        <Panel defaultSize={50} maxSize={90} minSize={10}>
+          <Editor
+            key={`user-${markdown}`}
+            markdown={markdown}
+            onContentChange={handleContentChange}
+          />
         </Panel>
       </PanelGroup>
     </div>

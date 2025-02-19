@@ -78,17 +78,20 @@ export default function EditPage() {
 
   return (
     <div style={{ height: "100vh" }}>
-      <PanelGroup direction="vertical">
-        <Panel defaultSize={70} maxSize={90} minSize={10}>
+      <PanelGroup direction="horizontal">
+        <Panel defaultSize={70} minSize={10} maxSize={90}>
           <Editor
             key={markdown}
             markdown={markdown}
             onContentChange={handleContentChange}
           />
         </Panel>
-        <PanelResizeHandle className="resize-handle" />
-        <Panel defaultSize={30} maxSize={90} minSize={10}>
-          <Editor markdown={previousUserMessage} onContentChange={() => {}} />
+        <PanelResizeHandle className="resize-handle-vertical" />
+        <Panel defaultSize={30} minSize={10} maxSize={90}>
+          <Editor
+            markdown={previousUserMessage}
+            onContentChange={() => {}}
+          />
         </Panel>
       </PanelGroup>
     </div>

@@ -5,12 +5,8 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-
-import {
-  updateMessage,
-  getMessageById,
-  getAllMessages,
-} from "@/utils/indexedDB";
+import { updateMessage, getMessageById, getAllMessages } from "@/utils/indexedDB";
+import { MessageDB } from "@/types";
 
 const Editor = dynamic(() => import("@/components/EditorComponent"), {
   ssr: false,
@@ -22,8 +18,7 @@ export default function EditPage() {
   const [previousUserMessage, setPreviousUserMessage] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
   const params = useParams();
-  const messageId =
-    typeof params.id === "string" ? parseInt(params.id, 10) : null;
+  const messageId = typeof params.id === "string" ? parseInt(params.id, 10) : null;
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -32,18 +27,16 @@ export default function EditPage() {
       try {
         // Получаем текущее сообщение
         const message = await getMessageById(messageId);
-
+        
         // Получаем все сообщения
         const allMessages = await getAllMessages();
-
+        
         // Находим индекс текущего сообщения
-        const currentIndex = allMessages.findIndex(
-          (msg) => msg.id === messageId,
-        );
-
+        const currentIndex = allMessages.findIndex(msg => msg.id === messageId);
+        
         // Ищем предыдущее сообщение с ролью user
         for (let i = currentIndex - 1; i >= 0; i--) {
-          if (allMessages[i].role === "user") {
+          if (allMessages[i].role === 'user') {
             setPreviousUserMessage(allMessages[i].text);
             break;
           }
@@ -79,7 +72,7 @@ export default function EditPage() {
   return (
     <div style={{ height: "100vh" }}>
       <PanelGroup direction="vertical">
-        <Panel defaultSize={70} maxSize={90} minSize={10}>
+        <Panel defaultSize={70} minSize={10} maxSize={90}>
           <Editor
             key={markdown}
             markdown={markdown}
@@ -87,8 +80,11 @@ export default function EditPage() {
           />
         </Panel>
         <PanelResizeHandle className="resize-handle" />
-        <Panel defaultSize={30} maxSize={90} minSize={10}>
-          <Editor markdown={previousUserMessage} onContentChange={() => {}} />
+        <Panel defaultSize={30} minSize={10} maxSize={90}>
+          <Editor
+            markdown={previousUserMessage}
+            onContentChange={() => {}}
+          />
         </Panel>
       </PanelGroup>
     </div>
