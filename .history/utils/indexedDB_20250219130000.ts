@@ -5,26 +5,21 @@ import { MessageDB } from "@/types/index";
 
 const DB_NAME = "ChatDB";
 const STORE_NAME = "messages";
-const DB_VERSION = 2;
+const DB_VERSION = 1;
 
 let dbPromise: Promise<IDBPDatabase<MessageDB>>;
 
 export const initializeDB = async () => {
   if (!dbPromise) {
     dbPromise = openDB<MessageDB>(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion, newVersion, transaction) {
-        if (oldVersion < 1) {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, {
             keyPath: "id",
             autoIncrement: true,
           });
 
           store.createIndex("timestamp", "timestamp");
-        }
-        if (oldVersion < 2) {
-          const store = transaction.objectStore(STORE_NAME);
-
-          store.createIndex("source", "source");
         }
       },
     });

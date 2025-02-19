@@ -12,7 +12,7 @@ import {
   getAllMessages,
 } from "@/utils/indexedDB";
 
-const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
+const Editor = dynamic(() => import("@/app/edit/EditorComponent"), {
   ssr: false,
   loading: () => <div className="text-default-500">Загрузка редактора...</div>,
 });

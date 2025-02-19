@@ -12,19 +12,19 @@ let dbPromise: Promise<IDBPDatabase<MessageDB>>;
 export const initializeDB = async () => {
   if (!dbPromise) {
     dbPromise = openDB<MessageDB>(DB_NAME, DB_VERSION, {
-      upgrade(db, oldVersion, newVersion, transaction) {
+      upgrade(db, oldVersion) {
         if (oldVersion < 1) {
           const store = db.createObjectStore(STORE_NAME, {
             keyPath: "id",
             autoIncrement: true,
           });
-
           store.createIndex("timestamp", "timestamp");
         }
         if (oldVersion < 2) {
-          const store = transaction.objectStore(STORE_NAME);
-
-          store.createIndex("source", "source");
+          const store = db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME);
+          if (!store.indexNames.contains("source")) {
+            store?.createIndex("source", "source");
+          }
         }
       },
     });
@@ -68,12 +68,9 @@ export const updateMessage = async (
   const message = await tx.store.get(id);
 
   if (message) {
-    if (updates.text !== undefined) {
-      message.text = updates.text;
-    }
-    if (updates.role !== undefined) {
-      message.role = updates.role;
-    }
+    if (updates.text !== undefined) message.text = updates.text;
+    if (updates.role !== undefined) message.role = updates.role;
+    if (updates.source !== undefined) message.source = updates.source;
     await tx.store.put(message);
   }
 

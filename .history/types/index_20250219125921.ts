@@ -18,7 +18,7 @@ export interface Message {
   text: string;
   role: "user" | string;
   timestamp: Date;
-  source?: string;
+  source: string;
 }
 
 export interface MessageDB {
@@ -26,7 +26,7 @@ export interface MessageDB {
   text: string;
   role: string;
   timestamp: string; // Хранение как строка ISO
-  source?: string;
+  source: string;
 }
 
 export interface ChatContainerProps {

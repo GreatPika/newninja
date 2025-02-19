@@ -18,12 +18,10 @@ export const initializeDB = async () => {
             keyPath: "id",
             autoIncrement: true,
           });
-
           store.createIndex("timestamp", "timestamp");
         }
         if (oldVersion < 2) {
           const store = transaction.objectStore(STORE_NAME);
-
           store.createIndex("source", "source");
         }
       },

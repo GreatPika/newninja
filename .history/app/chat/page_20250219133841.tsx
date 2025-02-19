@@ -1,7 +1,7 @@
 "use client";
 
 import { ChatContainer } from "@/app/chat/components/ChatConteiner";
-import AuthGuard from "@/app/login/AuthGuard";
+import AuthGuard from "@/components/AuthGuard";
 import { NavBar } from "@/app/chat/components/NavBar";
 
 export default function HomePage() {

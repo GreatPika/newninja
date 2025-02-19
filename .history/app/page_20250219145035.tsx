@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Card, CardBody, Tabs, Tab, NextUIProvider } from "@nextui-org/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-import LoginForm from "@/app/login/LoginForm";
-import RegisterForm from "@/app/login/RegisterForm";
+import LoginForm from "@/app/LoginPage/LoginForm";
+import RegisterForm from "@/app/LoginPage/RegisterForm";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState<string>("login");
