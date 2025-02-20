@@ -6,7 +6,11 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
-import { updateMessage, getMessageById } from "@/utils/indexedDB";
+import {
+  updateMessage,
+  getMessageById,
+  getAllMessages,
+} from "@/utils/indexedDB";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -26,13 +30,12 @@ export default function EditPage() {
       if (!messageId) return;
 
       try {
+        // Получаем текущее сообщение
         const message = await getMessageById(messageId);
-
+        
         if (message) {
           setMarkdown(message.text);
-          setSourceContent(
-            message.source ? convertSourceToText(message.source) : "",
-          );
+          setSourceContent(String(message.source || ""));
           setIsEditorReady(true);
         }
       } catch (error) {
@@ -42,22 +45,6 @@ export default function EditPage() {
 
     fetchContent();
   }, [messageId]);
-
-  const convertSourceToText = (source: string | object) => {
-    try {
-      const sourceObj =
-        typeof source === "string" ? JSON.parse(source) : source;
-
-      return Object.keys(sourceObj)
-        .sort((a, b) => parseInt(a) - parseInt(b))
-        .map((key) => `${key}: ${sourceObj[key]}`)
-        .join("\n\n");
-    } catch (e) {
-      console.error("Ошибка преобразования source:", e);
-
-      return "";
-    }
-  };
 
   const handleContentChange = async (content: string) => {
     if (messageId) {

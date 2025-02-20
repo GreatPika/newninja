@@ -31,7 +31,9 @@ export default function EditPage() {
         if (message) {
           setMarkdown(message.text);
           setSourceContent(
-            message.source ? convertSourceToText(message.source) : "",
+            message.source 
+              ? convertSourceToText(message.source)
+              : ""
           );
           setIsEditorReady(true);
         }
@@ -45,17 +47,14 @@ export default function EditPage() {
 
   const convertSourceToText = (source: string | object) => {
     try {
-      const sourceObj =
-        typeof source === "string" ? JSON.parse(source) : source;
-
+      const sourceObj = typeof source === 'string' ? JSON.parse(source) : source;
       return Object.keys(sourceObj)
         .sort((a, b) => parseInt(a) - parseInt(b))
-        .map((key) => `${key}: ${sourceObj[key]}`)
-        .join("\n\n");
+        .map(key => `${key}: ${sourceObj[key]}`)
+        .join('\n\n');
     } catch (e) {
-      console.error("Ошибка преобразования source:", e);
-
-      return "";
+      console.error('Ошибка преобразования source:', e);
+      return '';
     }
   };
 

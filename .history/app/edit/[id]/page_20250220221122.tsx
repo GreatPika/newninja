@@ -31,7 +31,11 @@ export default function EditPage() {
         if (message) {
           setMarkdown(message.text);
           setSourceContent(
-            message.source ? convertSourceToText(message.source) : "",
+            message.source
+              ? typeof message.source === "string"
+                ? message.source
+                : JSON.stringify(message.source, null, 2)
+              : "",
           );
           setIsEditorReady(true);
         }
@@ -42,22 +46,6 @@ export default function EditPage() {
 
     fetchContent();
   }, [messageId]);
-
-  const convertSourceToText = (source: string | object) => {
-    try {
-      const sourceObj =
-        typeof source === "string" ? JSON.parse(source) : source;
-
-      return Object.keys(sourceObj)
-        .sort((a, b) => parseInt(a) - parseInt(b))
-        .map((key) => `${key}: ${sourceObj[key]}`)
-        .join("\n\n");
-    } catch (e) {
-      console.error("Ошибка преобразования source:", e);
-
-      return "";
-    }
-  };
 
   const handleContentChange = async (content: string) => {
     if (messageId) {
