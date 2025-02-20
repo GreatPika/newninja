@@ -88,7 +88,6 @@ export async function getAssistantResponse(
               enqueueSnackbar(data.message, { variant: "info" });
             } else if (data.type === "error") {
               enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
-
               return null;
             } else if (data.type === "result") {
               analysis = data.data.analysis;
@@ -107,7 +106,7 @@ export async function getAssistantResponse(
     if (buffer?.startsWith("data:")) {
       try {
         const data = JSON.parse(buffer.substring(5));
-
+        
         if (data.type === "numbered_sentences") {
           sourceData = data.data;
         }
@@ -115,7 +114,6 @@ export async function getAssistantResponse(
           enqueueSnackbar(data.message, { variant: "info" });
         } else if (data.type === "error") {
           enqueueSnackbar(`Ошибка: ${data.message}`, { variant: "error" });
-
           return null;
         } else if (data.type === "result") {
           analysis = data.data.analysis;
@@ -131,7 +129,7 @@ export async function getAssistantResponse(
         text: analysis,
         role: productName,
         timestamp: new Date(),
-        source: sourceData,
+        source: sourceData
       };
     }
 
