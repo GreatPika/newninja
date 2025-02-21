@@ -31,10 +31,6 @@ interface EditorProps {
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
   sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -43,12 +39,13 @@ const Editor: FC<EditorProps> = ({
   onContentChange,
   showToolbar = true,
   sourceData,
-  onRowInfoChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [column4Value, setColumn4Value] = useState<string | null>(null);
+  const [position, setPosition] = useState({ x: window.innerWidth - 300, y: 20 });
+  const [isDragging, setIsDragging] = useState(false);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -126,13 +123,8 @@ const Editor: FC<EditorProps> = ({
                 : null;
 
             setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
           } else {
             setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
           }
 
           // Добавили вывод всех ячеек
@@ -153,7 +145,36 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [sourceData]);
+
+  // Обработчики для перетаскивания
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        setPosition({
+          x: e.clientX - 50,
+          y: e.clientY - 20
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   return (
     <div>
@@ -193,6 +214,26 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
+      {activeRow !== null && (
+        <div
+          style={{
+            position: 'fixed',
+            top: `${position.y}px`,
+            left: `${position.x}px`,
+            zIndex: 1000,
+            padding: "8px",
+            backgroundColor: theme === "dark" ? "#333" : "#f0f0f0",
+            color: theme === "dark" ? "#fff" : "#000",
+            borderRadius: "4px",
+            cursor: 'move',
+            userSelect: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}
+          onMouseDown={handleMouseDown}
+        >
+          Активная строка: {activeRow}, Значение в 5 колонке: {column4Value}
+        </div>
+      )}
     </div>
   );
 };

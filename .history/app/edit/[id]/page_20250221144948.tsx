@@ -7,7 +7,6 @@ import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { updateMessage, getMessageById } from "@/utils/indexedDB";
-import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -16,18 +15,12 @@ const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
-  const [, setSourceContent] = useState("");
+  const [sourceContent, setSourceContent] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
-  const [sourceData, setSourceData] = useState<
-    Record<string, string> | undefined
-  >();
+  const [sourceData, setSourceData] = useState<Record<string, string> | null>(null);
   const params = useParams();
   const messageId =
     typeof params.id === "string" ? parseInt(params.id, 10) : null;
-  const [pageRowInfo, setPageRowInfo] = useState<{
-    activeRow: number | null;
-    column4Value: string | null;
-  }>({ activeRow: null, column4Value: null });
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -44,22 +37,19 @@ export default function EditPage() {
 
           // Парсим source данные
           try {
-            const parsed = message.source ? JSON.parse(message.source) : {};
-
-            setSourceData(
-              typeof parsed === "object" && !Array.isArray(parsed)
-                ? parsed
-                : undefined,
-            );
+            const parsedSource = message.source
+              ? (JSON.parse(message.source) as Record<string, string>)
+              : {};
+            setSourceData(parsedSource);
           } catch (e) {
-            console.error("Ошибка парсинга source:", e);
-            setSourceData(undefined);
+            console.error("Parse error:", e);
+            setSourceData({});
           }
 
           setIsEditorReady(true);
         }
       } catch (error) {
-        console.error("Ошибка при загрузке сообщения:", error);
+        console.error("Fetch error:", error);
       }
     };
 
@@ -101,7 +91,7 @@ export default function EditPage() {
     <div style={{ height: "100vh", overflow: "hidden" }}>
       <PanelGroup direction="vertical">
         <Panel
-          defaultSize={85}
+          defaultSize={70}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
@@ -112,21 +102,23 @@ export default function EditPage() {
               markdown={markdown}
               sourceData={sourceData}
               onContentChange={handleContentChange}
-              onRowInfoChange={setPageRowInfo}
             />
           </div>
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel
-          defaultSize={15}
+          defaultSize={30}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
         >
-          <TableRowInfo
-            activeRow={pageRowInfo.activeRow}
-            column4Value={pageRowInfo.column4Value}
-          />
+          <div style={{ height: "100%" }}>
+            <Editor
+              markdown={sourceContent}
+              showToolbar={false}
+              onContentChange={() => {}}
+            />
+          </div>
         </Panel>
       </PanelGroup>
     </div>

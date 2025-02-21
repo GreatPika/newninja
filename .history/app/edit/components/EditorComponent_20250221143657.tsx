@@ -30,11 +30,7 @@ interface EditorProps {
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
-  sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
+  onColumn4ValueChange?: (value: string) => void; // новый пропс для передачи значения из 5-й колонки
 }
 
 const Editor: FC<EditorProps> = ({
@@ -42,13 +38,12 @@ const Editor: FC<EditorProps> = ({
   editorRef,
   onContentChange,
   showToolbar = true,
-  sourceData,
-  onRowInfoChange,
+  onColumn4ValueChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -62,7 +57,6 @@ const Editor: FC<EditorProps> = ({
         symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
 
       editor.insertMarkdown(escapedSymbol);
-    } else {
     }
   };
 
@@ -75,22 +69,22 @@ const Editor: FC<EditorProps> = ({
   }) => (
     <ButtonWithTooltip
       style={{
-        margin: "0", // Убираем расстояние между кнопками
-        padding: "0", // Убираем внутренние отступы
+        margin: "0",
+        padding: "0",
       }}
       title={title}
       onClick={() => insertSymbolAtCursor(symbol)}
     >
       <span
         style={{
-          fontSize: "24px", // Размер символа
+          fontSize: "24px",
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: "28px", // Ширина кнопки
-          height: "28px", // Высота кнопки
-          borderRadius: "4px", // Небольшой радиус для скругления
-          color: theme === "dark" ? "white" : "black", // Цвет текста в зависимости от темы
+          width: "28px",
+          height: "28px",
+          borderRadius: "4px",
+          color: theme === "dark" ? "white" : "black",
         }}
       >
         {symbol}
@@ -99,6 +93,9 @@ const Editor: FC<EditorProps> = ({
   );
 
   useEffect(() => {
+    // Добавляем обработчик клика только если передан onColumn4ValueChange (интерактивный режим)
+    if (!onColumn4ValueChange) return;
+
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
       const cell = target.closest<HTMLTableCellElement>("td, th");
@@ -117,26 +114,13 @@ const Editor: FC<EditorProps> = ({
 
           // Получаем 5-ю колонку (индекс 4) текущей строки
           const cells = Array.from(row.cells);
+          const column4Content = cells[4]?.textContent || "н/д";
 
-          if (cells.length > 4) {
-            const column4Content = cells[4]?.textContent?.trim() || null;
-            const sourceValue =
-              column4Content && sourceData
-                ? sourceData[column4Content] || null
-                : null;
-
-            setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
-          } else {
-            setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
-          }
-
-          // Добавили вывод всех ячеек
           setActiveRow(rowIndex);
+          setColumn4Value(column4Content);
+
+          // Передаём значение родительскому компоненту
+          onColumn4ValueChange(column4Content);
 
           return;
         }
@@ -153,7 +137,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [onColumn4ValueChange]);
 
   return (
     <div>
@@ -193,6 +177,20 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
+      {activeRow !== null && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "8px",
+            backgroundColor: theme === "dark" ? "#333" : "#f0f0f0",
+            color: theme === "dark" ? "#fff" : "#000",
+            borderRadius: "4px",
+          }}
+        >
+          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
+          {column4Value ?? "н/д"}
+        </div>
+      )}
     </div>
   );
 };

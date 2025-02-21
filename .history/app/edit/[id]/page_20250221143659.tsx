@@ -7,7 +7,6 @@ import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { updateMessage, getMessageById } from "@/utils/indexedDB";
-import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -16,18 +15,24 @@ const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
-  const [, setSourceContent] = useState("");
+  const [sourceContent, setSourceContent] = useState("");
+  const [rawSource, setRawSource] = useState<any>(null);
+  const [selectedSentenceKey, setSelectedSentenceKey] = useState<string | null>(null);
   const [isEditorReady, setIsEditorReady] = useState(false);
-  const [sourceData, setSourceData] = useState<
-    Record<string, string> | undefined
-  >();
   const params = useParams();
   const messageId =
     typeof params.id === "string" ? parseInt(params.id, 10) : null;
-  const [pageRowInfo, setPageRowInfo] = useState<{
-    activeRow: number | null;
-    column4Value: string | null;
-  }>({ activeRow: null, column4Value: null });
+
+  const convertSourceFullToText = (sourceObj: any) => {
+    return Object.keys(sourceObj)
+      .sort((a, b) => parseInt(a) - parseInt(b))
+      .map((key) => `${key}: ${sourceObj[key]}`)
+      .join("\n\n");
+  };
+
+  const convertSourceKeyToText = (sourceObj: any, key: string) => {
+    return sourceObj[key] ? `${key}: ${sourceObj[key]}` : "н/д";
+  };
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -38,24 +43,13 @@ export default function EditPage() {
 
         if (message) {
           setMarkdown(message.text);
-          setSourceContent(
-            message.source ? convertSourceToText(message.source) : "",
-          );
-
-          // Парсим source данные
-          try {
-            const parsed = message.source ? JSON.parse(message.source) : {};
-
-            setSourceData(
-              typeof parsed === "object" && !Array.isArray(parsed)
-                ? parsed
-                : undefined,
-            );
-          } catch (e) {
-            console.error("Ошибка парсинга source:", e);
-            setSourceData(undefined);
+          if (message.source) {
+            const sourceObj =
+              typeof message.source === "string" ? JSON.parse(message.source) : message.source;
+            setRawSource(sourceObj);
+            // Изначально отображаем весь source
+            setSourceContent(convertSourceFullToText(sourceObj));
           }
-
           setIsEditorReady(true);
         }
       } catch (error) {
@@ -65,22 +59,6 @@ export default function EditPage() {
 
     fetchContent();
   }, [messageId]);
-
-  const convertSourceToText = (source: string | object) => {
-    try {
-      const sourceObj =
-        typeof source === "string" ? JSON.parse(source) : source;
-
-      return Object.keys(sourceObj)
-        .sort((a, b) => parseInt(a) - parseInt(b))
-        .map((key) => `${key}: ${sourceObj[key]}`)
-        .join("\n\n");
-    } catch (e) {
-      console.error("Ошибка преобразования source:", e);
-
-      return "";
-    }
-  };
 
   const handleContentChange = async (content: string) => {
     if (messageId) {
@@ -93,6 +71,13 @@ export default function EditPage() {
     }
   };
 
+  const handleColumn4ValueChange = (value: string) => {
+    setSelectedSentenceKey(value);
+    if (rawSource) {
+      setSourceContent(convertSourceKeyToText(rawSource, value));
+    }
+  };
+
   if (!isEditorReady) {
     return <div className="text-default-500">Загрузка...</div>;
   }
@@ -101,7 +86,7 @@ export default function EditPage() {
     <div style={{ height: "100vh", overflow: "hidden" }}>
       <PanelGroup direction="vertical">
         <Panel
-          defaultSize={85}
+          defaultSize={70}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
@@ -110,23 +95,25 @@ export default function EditPage() {
             <Editor
               key={markdown}
               markdown={markdown}
-              sourceData={sourceData}
               onContentChange={handleContentChange}
-              onRowInfoChange={setPageRowInfo}
+              onColumn4ValueChange={handleColumn4ValueChange}
             />
           </div>
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel
-          defaultSize={15}
+          defaultSize={30}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
         >
-          <TableRowInfo
-            activeRow={pageRowInfo.activeRow}
-            column4Value={pageRowInfo.column4Value}
-          />
+          <div style={{ height: "100%" }}>
+            <Editor
+              markdown={sourceContent}
+              showToolbar={false}
+              onContentChange={() => {}}
+            />
+          </div>
         </Panel>
       </PanelGroup>
     </div>

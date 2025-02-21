@@ -7,7 +7,6 @@ import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { updateMessage, getMessageById } from "@/utils/indexedDB";
-import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -16,18 +15,17 @@ const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
-  const [, setSourceContent] = useState("");
+  const [sourceContent, setSourceContent] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [sourceData, setSourceData] = useState<
+    Record<string, string> | undefined
+  >();
+  const [parsedSourceData, setParsedSourceData] = useState<
     Record<string, string> | undefined
   >();
   const params = useParams();
   const messageId =
     typeof params.id === "string" ? parseInt(params.id, 10) : null;
-  const [pageRowInfo, setPageRowInfo] = useState<{
-    activeRow: number | null;
-    column4Value: string | null;
-  }>({ activeRow: null, column4Value: null });
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -66,6 +64,10 @@ export default function EditPage() {
     fetchContent();
   }, [messageId]);
 
+  useEffect(() => {
+    setParsedSourceData(convertTextToSource(sourceContent));
+  }, [sourceContent]);
+
   const convertSourceToText = (source: string | object) => {
     try {
       const sourceObj =
@@ -79,6 +81,27 @@ export default function EditPage() {
       console.error("Ошибка преобразования source:", e);
 
       return "";
+    }
+  };
+
+  const convertTextToSource = (text: string) => {
+    try {
+      return text.split("\n\n").reduce(
+        (acc, line) => {
+          const [key, ...value] = line.split(": ");
+
+          if (key) {
+            acc[key.trim()] = value.join(": ").trim();
+          }
+
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+    } catch (e) {
+      console.error("Ошибка преобразования текста в source:", e);
+
+      return {};
     }
   };
 
@@ -101,7 +124,7 @@ export default function EditPage() {
     <div style={{ height: "100vh", overflow: "hidden" }}>
       <PanelGroup direction="vertical">
         <Panel
-          defaultSize={85}
+          defaultSize={70}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
@@ -112,21 +135,24 @@ export default function EditPage() {
               markdown={markdown}
               sourceData={sourceData}
               onContentChange={handleContentChange}
-              onRowInfoChange={setPageRowInfo}
             />
           </div>
         </Panel>
         <PanelResizeHandle className="resize-handle" />
         <Panel
-          defaultSize={15}
+          defaultSize={30}
           maxSize={90}
           minSize={10}
           style={{ overflow: "auto" }}
         >
-          <TableRowInfo
-            activeRow={pageRowInfo.activeRow}
-            column4Value={pageRowInfo.column4Value}
-          />
+          <div style={{ height: "100%" }}>
+            <Editor
+              markdown={sourceContent}
+              showToolbar={false}
+              sourceData={parsedSourceData}
+              onContentChange={() => {}}
+            />
+          </div>
         </Panel>
       </PanelGroup>
     </div>

@@ -7,7 +7,6 @@ import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { updateMessage, getMessageById } from "@/utils/indexedDB";
-import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -16,7 +15,7 @@ const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
 
 export default function EditPage() {
   const [markdown, setMarkdown] = useState("");
-  const [, setSourceContent] = useState("");
+  const [sourceContent, setSourceContent] = useState("");
   const [isEditorReady, setIsEditorReady] = useState(false);
   const [sourceData, setSourceData] = useState<
     Record<string, string> | undefined
@@ -121,12 +120,15 @@ export default function EditPage() {
           defaultSize={15}
           maxSize={90}
           minSize={10}
-          style={{ overflow: "auto" }}
+          style={{ overflow: "auto", padding: "1rem" }}
         >
-          <TableRowInfo
-            activeRow={pageRowInfo.activeRow}
-            column4Value={pageRowInfo.column4Value}
-          />
+          <div className="space-y-2">
+            <h3 className="font-semibold">Информация о строке:</h3>
+            <div>
+              <p>Активная строка: {pageRowInfo.activeRow ?? "не выбрана"}</p>
+              <p>Значение колонки 4: {pageRowInfo.column4Value ?? "н/д"}</p>
+            </div>
+          </div>
         </Panel>
       </PanelGroup>
     </div>

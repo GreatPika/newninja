@@ -30,11 +30,7 @@ interface EditorProps {
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
-  sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
+  onColumn4Change?: (value: string | null) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -42,13 +38,12 @@ const Editor: FC<EditorProps> = ({
   editorRef,
   onContentChange,
   showToolbar = true,
-  sourceData,
-  onRowInfoChange,
+  onColumn4Change,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -117,26 +112,12 @@ const Editor: FC<EditorProps> = ({
 
           // Получаем 5-ю колонку (индекс 4) текущей строки
           const cells = Array.from(row.cells);
-
-          if (cells.length > 4) {
-            const column4Content = cells[4]?.textContent?.trim() || null;
-            const sourceValue =
-              column4Content && sourceData
-                ? sourceData[column4Content] || null
-                : null;
-
-            setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
-          } else {
-            setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
-          }
+          const column4Content = cells[4]?.textContent?.trim() || null;
 
           // Добавили вывод всех ячеек
           setActiveRow(rowIndex);
+          setColumn4Value(column4Content);
+          onColumn4Change?.(column4Content);
 
           return;
         }
@@ -153,7 +134,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [onColumn4Change]);
 
   return (
     <div>
@@ -193,6 +174,20 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
+      {activeRow !== null && (
+        <div
+          style={{
+            marginTop: "10px",
+            padding: "8px",
+            backgroundColor: theme === "dark" ? "#333" : "#f0f0f0",
+            color: theme === "dark" ? "#fff" : "#000",
+            borderRadius: "4px",
+          }}
+        >
+          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
+          {column4Value ?? "н/д"}
+        </div>
+      )}
     </div>
   );
 };

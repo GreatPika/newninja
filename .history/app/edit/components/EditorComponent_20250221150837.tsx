@@ -24,6 +24,7 @@ import {
 } from "@mdxeditor/editor";
 import { FC, useRef, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { ActiveRowInfo } from "./ActiveRowInfo";
 
 interface EditorProps {
   markdown: string;
@@ -31,10 +32,8 @@ interface EditorProps {
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
   sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
+  onActiveRowChange?: (row: number | null) => void;
+  onColumn4ValueChange?: (value: string | null) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -43,12 +42,13 @@ const Editor: FC<EditorProps> = ({
   onContentChange,
   showToolbar = true,
   sourceData,
-  onRowInfoChange,
+  onActiveRowChange,
+  onColumn4ValueChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -125,18 +125,20 @@ const Editor: FC<EditorProps> = ({
                 ? sourceData[column4Content] || null
                 : null;
 
-            setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
+            setColumn4Value(
+              sourceValue?.toString() ||
+              column4Content ||
+              'н/д'
+            );
           } else {
             setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
           }
 
           // Добавили вывод всех ячеек
           setActiveRow(rowIndex);
+
+          if (onActiveRowChange) onActiveRowChange(rowIndex);
+          if (onColumn4ValueChange) onColumn4ValueChange(column4Value);
 
           return;
         }
@@ -153,7 +155,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [sourceData, onActiveRowChange, onColumn4ValueChange]);
 
   return (
     <div>

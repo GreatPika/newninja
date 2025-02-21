@@ -25,16 +25,16 @@ import {
 import { FC, useRef, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 
+import { TableRowInfo } from "./TableRowInfo";
+
 interface EditorProps {
   markdown: string;
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
   sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
+  onActiveRowChange?: (row: number | null) => void;
+  onColumn4ValueChange?: (value: string | null) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -43,12 +43,11 @@ const Editor: FC<EditorProps> = ({
   onContentChange,
   showToolbar = true,
   sourceData,
-  onRowInfoChange,
+  onActiveRowChange,
+  onColumn4ValueChange
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -124,26 +123,20 @@ const Editor: FC<EditorProps> = ({
               column4Content && sourceData
                 ? sourceData[column4Content] || null
                 : null;
-
-            setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
+            const finalValue = sourceValue?.toString() || column4Content || "н/д";
+            
+            onColumn4ValueChange?.(finalValue);
           } else {
-            setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
+            onColumn4ValueChange?.("н/д");
           }
 
-          // Добавили вывод всех ячеек
-          setActiveRow(rowIndex);
-
+          onActiveRowChange?.(rowIndex);
           return;
         }
       }
 
-      setActiveRow(null);
-      setColumn4Value(null);
+      onActiveRowChange?.(null);
+      onColumn4ValueChange?.(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -153,7 +146,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [sourceData, onActiveRowChange, onColumn4ValueChange]);
 
   return (
     <div>

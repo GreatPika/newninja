@@ -121,7 +121,7 @@ export default function EditPage() {
           defaultSize={15}
           maxSize={90}
           minSize={10}
-          style={{ overflow: "auto" }}
+          style={{ overflow: "auto", padding: "1rem" }}
         >
           <TableRowInfo
             activeRow={pageRowInfo.activeRow}

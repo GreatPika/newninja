@@ -25,16 +25,14 @@ import {
 import { FC, useRef, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 
+import { TableRowInfo } from "./TableRowInfo";
+
 interface EditorProps {
   markdown: string;
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
   sourceData?: Record<string, string>;
-  onRowInfoChange?: (rowInfo: {
-    activeRow: number | null;
-    column4Value: string | null;
-  }) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -43,12 +41,11 @@ const Editor: FC<EditorProps> = ({
   onContentChange,
   showToolbar = true,
   sourceData,
-  onRowInfoChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
-  const [, setActiveRow] = useState<number | null>(null);
-  const [, setColumn4Value] = useState<string | null>(null);
+  const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -126,13 +123,8 @@ const Editor: FC<EditorProps> = ({
                 : null;
 
             setColumn4Value(sourceValue?.toString() || column4Content || "н/д");
-            onRowInfoChange?.({
-              activeRow: rowIndex,
-              column4Value: sourceValue?.toString() || column4Content || "н/д",
-            });
           } else {
             setColumn4Value("н/д");
-            onRowInfoChange?.({ activeRow: rowIndex, column4Value: "н/д" });
           }
 
           // Добавили вывод всех ячеек
@@ -153,7 +145,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, [sourceData, onRowInfoChange]);
+  }, [sourceData]);
 
   return (
     <div>
@@ -193,6 +185,7 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
+      <TableRowInfo activeRow={activeRow} column4Value={column4Value} />
     </div>
   );
 };
