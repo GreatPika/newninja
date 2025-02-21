@@ -113,7 +113,7 @@
 
 .custom-table-styles table td:nth-child(5),
 .custom-table-styles table th:nth-child(5) {
-  width: 0;
+  width: 13%;
   padding: 0;
   font-size: 0;
   line-height: 0;
@@ -127,9 +127,8 @@
   display: none !important;
 }
 
-/* Скрываем кнопки управления колонками таблицы */
-._tableColumnEditorTrigger_uazmk_743,
-button[aria-haspopup="dialog"][title="Column menu"],
-._addColumnButton_uazmk_746 {
+/* Вариант 2: если кнопка находится в контекстном меню таблицы */
+.mdxeditor-table-context-menu button[aria-label*="Delete"],
+.mdxeditor-table-toolbar button[aria-label*="Delete"] {
   display: none !important;
 }

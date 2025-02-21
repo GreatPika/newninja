@@ -126,10 +126,3 @@
 .mdxeditor [data-delete-table] {
   display: none !important;
 }
-
-/* Скрываем кнопки управления колонками таблицы */
-._tableColumnEditorTrigger_uazmk_743,
-button[aria-haspopup="dialog"][title="Column menu"],
-._addColumnButton_uazmk_746 {
-  display: none !important;
-}

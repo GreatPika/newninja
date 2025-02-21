@@ -120,16 +120,15 @@
   color: transparent;
 }
 
-/* Вариант 1: более специфичный селектор */
+/* Скрываем кнопки удаления таблицы, добавления и удаления колонок */
 .mdxeditor button[aria-label*="Delete table"],
 .mdxeditor button[title*="Delete table"],
-.mdxeditor [data-delete-table] {
-  display: none !important;
-}
-
-/* Скрываем кнопки управления колонками таблицы */
-._tableColumnEditorTrigger_uazmk_743,
-button[aria-haspopup="dialog"][title="Column menu"],
-._addColumnButton_uazmk_746 {
+.mdxeditor [data-delete-table],
+.mdxeditor button[aria-label*="Insert column"],
+.mdxeditor button[title*="Insert column"],
+.mdxeditor button[aria-label*="Delete column"],
+.mdxeditor button[title*="Delete column"],
+.mdxeditor [data-insert-column],
+.mdxeditor [data-delete-column] {
   display: none !important;
 }

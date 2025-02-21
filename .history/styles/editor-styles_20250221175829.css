@@ -120,16 +120,7 @@
   color: transparent;
 }
 
-/* Вариант 1: более специфичный селектор */
-.mdxeditor button[aria-label*="Delete table"],
-.mdxeditor button[title*="Delete table"],
-.mdxeditor [data-delete-table] {
-  display: none !important;
-}
-
-/* Скрываем кнопки управления колонками таблицы */
-._tableColumnEditorTrigger_uazmk_743,
-button[aria-haspopup="dialog"][title="Column menu"],
-._addColumnButton_uazmk_746 {
-  display: none !important;
+/* Скрываем кнопку удаления таблицы */
+.mdxeditor-toolbar-group button[title="Delete table"] {
+  display: none;
 }

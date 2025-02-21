@@ -129,7 +129,6 @@
 
 /* Скрываем кнопки управления колонками таблицы */
 ._tableColumnEditorTrigger_uazmk_743,
-button[aria-haspopup="dialog"][title="Column menu"],
-._addColumnButton_uazmk_746 {
+button[aria-haspopup="dialog"][title="Column menu"] {
   display: none !important;
 }
