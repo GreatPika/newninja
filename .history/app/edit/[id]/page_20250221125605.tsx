@@ -1,0 +1,133 @@
+/* eslint-disable no-console */
+"use client";
+
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
+import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+
+import { updateMessage, getMessageById } from "@/utils/indexedDB";
+
+const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
+  ssr: false,
+  loading: () => <div className="text-default-500">Загрузка редактора...</div>,
+});
+
+export default function EditPage() {
+  const [markdown, setMarkdown] = useState("");
+  const [sourceContent, setSourceContent] = useState("");
+  const [isEditorReady, setIsEditorReady] = useState(false);
+  const [sourceData, setSourceData] = useState<Record<string, string>>({});
+  const params = useParams();
+  const messageId =
+    typeof params.id === "string" ? parseInt(params.id, 10) : null;
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      if (!messageId) return;
+
+      try {
+        const message = await getMessageById(messageId);
+
+        if (message) {
+          setMarkdown(message.text);
+          if (message.source) {
+            const sourceObj =
+              typeof message.source === "string" ? JSON.parse(message.source) : message.source;
+            setSourceData(sourceObj);
+            setSourceContent(convertSourceToText(sourceObj));
+          }
+          setIsEditorReady(true);
+        }
+      } catch (error) {
+        console.error("Ошибка при загрузке сообщения:", error);
+      }
+    };
+
+    fetchContent();
+  }, [messageId]);
+
+  const handleActiveRowChange = async ({ column4Value }: { column4Value: string }) => {
+    try {
+      console.log('Received column4 value:', column4Value);
+      
+      const sentenceNumber = column4Value.replace(/\D/g, '') || '1';
+      console.log('Extracted sentence number:', sentenceNumber, 'Source keys:', Object.keys(sourceData));
+      
+      if (!sourceData || !sourceData[sentenceNumber]) {
+        console.warn('Sentence not found in source data');
+        setSourceContent('Предложение не найдено');
+        return;
+      }
+
+      const selectedSentence = `**Предложение ${sentenceNumber}:**\n${sourceData[sentenceNumber]}`;
+      console.log('Updating content:', selectedSentence);
+      setSourceContent(selectedSentence);
+
+    } catch (e) {
+      console.error('Ошибка обработки номера предложения:', e);
+      setSourceContent('Ошибка при обработке номера предложения');
+    }
+  };
+
+  useEffect(() => {
+    console.log('Current source content:', sourceContent);
+  }, [sourceContent]);
+
+  const convertSourceToText = (source: Record<string, string>) => {
+    return 'Выберите строку в таблице для просмотра соответствующего предложения';
+  };
+
+  const handleContentChange = async (content: string) => {
+    if (messageId) {
+      try {
+        await updateMessage(messageId, { text: content });
+        console.log("Изменения сохранены");
+      } catch (error) {
+        console.error("Ошибка при сохранении изменений:", error);
+      }
+    }
+  };
+
+  if (!isEditorReady) {
+    return <div className="text-default-500">Загрузка...</div>;
+  }
+
+  return (
+    <div style={{ height: "100vh", overflow: "hidden" }}>
+      <PanelGroup direction="vertical">
+        <Panel
+          defaultSize={70}
+          maxSize={90}
+          minSize={10}
+          style={{ overflow: "auto" }}
+        >
+          <div style={{ height: "100%" }}>
+            <Editor
+              key={markdown}
+              markdown={markdown}
+              onContentChange={handleContentChange}
+              onActiveRowChange={handleActiveRowChange}
+            />
+          </div>
+        </Panel>
+        <PanelResizeHandle className="resize-handle" />
+        <Panel
+          defaultSize={30}
+          maxSize={90}
+          minSize={10}
+          style={{ overflow: "auto" }}
+        >
+          <div style={{ height: "100%" }}>
+            <Editor
+              key={sourceContent}
+              markdown={sourceContent}
+              showToolbar={false}
+              onContentChange={() => {}}
+            />
+          </div>
+        </Panel>
+      </PanelGroup>
+    </div>
+  );
+}

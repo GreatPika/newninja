@@ -30,6 +30,7 @@ interface EditorProps {
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
+  onActiveRowChange?: (rowData: { rowNumber: number; column4Value: string }) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -37,11 +38,11 @@ const Editor: FC<EditorProps> = ({
   editorRef,
   onContentChange,
   showToolbar = true,
+  onActiveRowChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -92,7 +93,7 @@ const Editor: FC<EditorProps> = ({
   );
 
   useEffect(() => {
-    const handleClick = (e: Event) => {
+    const handleClick = async (e: Event) => {
       const target = e.target as HTMLElement;
       const cell = target.closest<HTMLTableCellElement>("td, th");
 
@@ -101,27 +102,19 @@ const Editor: FC<EditorProps> = ({
         const table = row?.closest("table");
 
         if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
-          );
-
-          const headerRowCount = table.tHead?.rows.length || 0;
-          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
+          const rows = Array.from(table.tBodies[0].rows);
+          const rowIndex = rows.indexOf(row) + 1;
+          
+          // Получаем содержимое 4-й колонки (индекс 3)
           const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
+          const column4Value = cells[3]?.textContent?.trim() || '';
+          
           setActiveRow(rowIndex);
-          setColumn4Value(column4Content);
-
+          onActiveRowChange?.({ rowNumber: rowIndex, column4Value });
           return;
         }
       }
-
       setActiveRow(null);
-      setColumn4Value(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -131,7 +124,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, []);
+  }, [onActiveRowChange]);
 
   return (
     <div>
@@ -181,8 +174,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Активная строка таблицы: {activeRow}
         </div>
       )}
     </div>

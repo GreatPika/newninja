@@ -94,32 +94,31 @@ const Editor: FC<EditorProps> = ({
   useEffect(() => {
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
+      const cell = target.closest<HTMLTableCellElement>('td, th');
+      
       if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
+        const row = cell.closest('tr');
+        const table = row?.closest('table');
+        
         if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
+          const tbodyRows = Array.from(table.tBodies).flatMap(tbody => 
+            Array.from(tbody.rows)
           );
-
+          
           const headerRowCount = table.tHead?.rows.length || 0;
           const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
+          
+          // Получаем 4-ю колонку (индекс 3) текущей строки
           const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
+          const column4Content = cells[3]?.textContent || 'н/д'; // Запасной вариант
+          
+          console.log(`Строка: ${rowIndex}, Колонка 4: ${column4Content}`);
           setActiveRow(rowIndex);
           setColumn4Value(column4Content);
-
           return;
         }
       }
-
+      
       setActiveRow(null);
       setColumn4Value(null);
     };
@@ -181,8 +180,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Активная строка: {activeRow}, Значение в 4 колонке: {column4Value ?? 'н/д'}
         </div>
       )}
     </div>

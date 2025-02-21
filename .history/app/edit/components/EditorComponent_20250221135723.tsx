@@ -16,6 +16,7 @@ import {
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
   ButtonWithTooltip,
+  TableNode,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -24,6 +25,8 @@ import {
 } from "@mdxeditor/editor";
 import { FC, useRef, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
+import { $getNodeByKey } from 'lexical';
 
 interface EditorProps {
   markdown: string;
@@ -41,7 +44,9 @@ const Editor: FC<EditorProps> = ({
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-  const [column4Value, setColumn4Value] = useState<string | null>(null);
+  const [activeCell, setActiveCell] = useState<number | null>(null);
+  const [editor] = useLexicalComposerContext();
+  const [activeCoords, setActiveCoords] = useState<{row: number; col: number} | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -91,47 +96,29 @@ const Editor: FC<EditorProps> = ({
     </ButtonWithTooltip>
   );
 
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
-      if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
-        if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
-          );
-
-          const headerRowCount = table.tHead?.rows.length || 0;
-          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
-          const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
-          setActiveRow(rowIndex);
-          setColumn4Value(column4Content);
-
-          return;
+  const handleCellClick = (cell: HTMLTableCellElement, rowIndex: number, colIndex: number) => {
+    try {
+      const table = cell.closest('table');
+      const tableNodeKey = table?.dataset.nodeKey;
+      
+      if (tableNodeKey) {
+        // Используем внутренний API MDX Editor через ref
+        const editorInstance = editorRef?.current || localEditorRef.current;
+        const rootNode = editorInstance?.rootNode;
+        
+        if (rootNode) {
+          const tableNode = rootNode.getNodeByKey(tableNodeKey) as InstanceType<typeof TableNode>;
+          const adjustedRow = rowIndex + 1; // Корректировка индекса
+          const adjustedCol = colIndex + 1;
+          
+          console.log('Координаты:', {row: adjustedRow, col: adjustedCol});
+          setActiveCoords({row: adjustedRow, col: adjustedCol});
         }
       }
-
-      setActiveRow(null);
-      setColumn4Value(null);
-    };
-
-    const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
-
-    editorElement?.addEventListener("click", handleClick as EventListener);
-
-    return () => {
-      editorElement?.removeEventListener("click", handleClick as EventListener);
-    };
-  }, []);
+    } catch (error) {
+      console.error('Ошибка при обработке клика:', error);
+    }
+  };
 
   return (
     <div>
@@ -146,7 +133,16 @@ const Editor: FC<EditorProps> = ({
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),
-          tablePlugin(),
+          tablePlugin({
+            cellAttributes: [
+              (cell: HTMLTableCellElement, rowIndex: number, colIndex: number) => ({
+                onClick: () => handleCellClick(cell, rowIndex, colIndex),
+                'data-rowindex': rowIndex,
+                'data-colindex': colIndex,
+                style: { cursor: 'pointer' }
+              })
+            ]
+          }),
           thematicBreakPlugin(),
           frontmatterPlugin(),
           markdownShortcutPlugin(),
@@ -171,7 +167,7 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
-      {activeRow !== null && (
+      {activeCoords && (
         <div
           style={{
             marginTop: "10px",
@@ -181,8 +177,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Строка: {activeCoords.row}, Ячейка: {activeCoords.col}
         </div>
       )}
     </div>

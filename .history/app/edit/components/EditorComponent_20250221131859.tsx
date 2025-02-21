@@ -30,6 +30,8 @@ interface EditorProps {
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
+  selectedSentence?: string | null;
+  onSentenceSelect?: (sentenceNumber: string | null) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -37,11 +39,12 @@ const Editor: FC<EditorProps> = ({
   editorRef,
   onContentChange,
   showToolbar = true,
+  selectedSentence,
+  onSentenceSelect,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -101,27 +104,23 @@ const Editor: FC<EditorProps> = ({
         const table = row?.closest("table");
 
         if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
-          );
-
-          const headerRowCount = table.tHead?.rows.length || 0;
-          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
           const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
-          setActiveRow(rowIndex);
-          setColumn4Value(column4Content);
-
+          // Получаем содержимое 4-й ячейки (индекс 3)
+          const sentenceNumber = cells[3]?.textContent?.trim() || null;
+          
+          // Передаем номер предложения в родительский компонент
+          if (sentenceNumber && onSentenceSelect) {
+            onSentenceSelect(sentenceNumber);
+          }
+          
           return;
         }
       }
 
-      setActiveRow(null);
-      setColumn4Value(null);
+      // Сбрасываем выбор при клике вне таблицы
+      if (onSentenceSelect) {
+        onSentenceSelect(null);
+      }
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -131,7 +130,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, []);
+  }, [onSentenceSelect]);
 
   return (
     <div>
@@ -181,8 +180,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Активная строка таблицы: {activeRow}
         </div>
       )}
     </div>

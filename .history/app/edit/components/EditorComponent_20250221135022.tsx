@@ -41,7 +41,7 @@ const Editor: FC<EditorProps> = ({
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-  const [column4Value, setColumn4Value] = useState<string | null>(null);
+  const [activeCell, setActiveCell] = useState<number | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -94,34 +94,32 @@ const Editor: FC<EditorProps> = ({
   useEffect(() => {
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
+      const cell = target.closest<HTMLTableCellElement>('td, th');
+      
       if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
+        const row = cell.closest('tr');
+        const table = row?.closest('table');
+        
         if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
+          const tbodyRows = Array.from(table.tBodies).flatMap(tbody => 
+            Array.from(tbody.rows)
           );
-
+          const rowIndex = tbodyRows.indexOf(row) + 1;
+          const cellIndex = Array.from(row.cells).indexOf(cell) + 1;
+          
+          // Корректировка для заголовков
           const headerRowCount = table.tHead?.rows.length || 0;
-          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
-          const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
-          setActiveRow(rowIndex);
-          setColumn4Value(column4Content);
-
+          const adjustedRowIndex = rowIndex + headerRowCount;
+          
+          console.log(`Строка: ${adjustedRowIndex}, Ячейка: ${cellIndex}`);
+          setActiveRow(adjustedRowIndex);
+          setActiveCell(cellIndex);
           return;
         }
       }
-
+      
       setActiveRow(null);
-      setColumn4Value(null);
+      setActiveCell(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -181,8 +179,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Активная строка: {activeRow}, Ячейка: {activeCell}
         </div>
       )}
     </div>

@@ -30,6 +30,7 @@ interface EditorProps {
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   onContentChange?: (content: string) => void;
   showToolbar?: boolean;
+  onActiveSentenceChange?: (sentenceNumber: number) => void;
 }
 
 const Editor: FC<EditorProps> = ({
@@ -37,11 +38,11 @@ const Editor: FC<EditorProps> = ({
   editorRef,
   onContentChange,
   showToolbar = true,
+  onActiveSentenceChange,
 }) => {
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
-  const [column4Value, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -95,33 +96,27 @@ const Editor: FC<EditorProps> = ({
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
       const cell = target.closest<HTMLTableCellElement>("td, th");
-
+      
       if (cell) {
         const row = cell.closest("tr");
         const table = row?.closest("table");
-
+        
         if (row && table) {
-          const tbodyRows = Array.from(table.tBodies).flatMap((tbody) =>
-            Array.from(tbody.rows),
-          );
-
-          const headerRowCount = table.tHead?.rows.length || 0;
-          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
-
-          // Получаем 5-ю колонку (индекс 4) текущей строки
           const cells = Array.from(row.cells);
-          const column4Content = cells[4]?.textContent || "н/д"; // Изменили индекс с 3 на 4
-
-          // Добавили вывод всех ячеек
-          setActiveRow(rowIndex);
-          setColumn4Value(column4Content);
-
-          return;
+          console.log('Ячейки строки:', cells.map(c => c.textContent));
+          
+          const sentenceNumber = cells[3]?.textContent?.trim();
+          console.log('Извлеченный номер предложения:', sentenceNumber);
+          
+          if (sentenceNumber && onActiveSentenceChange) {
+            const number = parseInt(sentenceNumber);
+            if (!isNaN(number)) {
+              console.log('Установлен активный номер:', number);
+              onActiveSentenceChange(number);
+            }
+          }
         }
       }
-
-      setActiveRow(null);
-      setColumn4Value(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -131,7 +126,7 @@ const Editor: FC<EditorProps> = ({
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
-  }, []);
+  }, [onActiveSentenceChange]);
 
   return (
     <div>
@@ -181,8 +176,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка: {activeRow}, Значение в 5 колонке:{" "}
-          {column4Value ?? "н/д"}
+          Активная строка таблицы: {activeRow}
         </div>
       )}
     </div>
