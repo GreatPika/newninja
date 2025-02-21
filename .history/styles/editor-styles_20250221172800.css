@@ -104,3 +104,20 @@
   --basePageBg: rgb(20, 20, 20);
   background: var(--basePageBg);
 }
+
+.mdxeditor table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* Задаем ширину для ячеек в первой строке, которая определит ширину колонок */
+.mdxeditor table tr:first-child th:nth-child(1),
+.mdxeditor table tr td:nth-child(1) { width: 15%; }
+.mdxeditor table tr:first-child th:nth-child(2),
+.mdxeditor table tr td:nth-child(2) { width: 20%; }
+.mdxeditor table tr:first-child th:nth-child(3),
+.mdxeditor table tr td:nth-child(3) { width: 25%; }
+.mdxeditor table tr:first-child th:nth-child(4),
+.mdxeditor table tr td:nth-child(4) { width: 20%; }
+.mdxeditor table tr:first-child th:nth-child(5),
+.mdxeditor table tr td:nth-child(5) { width: 20%; }

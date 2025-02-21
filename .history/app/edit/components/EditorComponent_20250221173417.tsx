@@ -52,7 +52,7 @@ const Editor: FC<EditorProps> = ({
   const [, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
-    return `${theme === "dark" ? "dark-theme dark-editor" : "light-editor"} custom-table-styles`;
+    return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
   const insertSymbolAtCursor = (symbol: string) => {
@@ -122,28 +122,6 @@ const Editor: FC<EditorProps> = ({
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
   }, [sourceData, onRowInfoChange]);
-
-  useEffect(() => {
-    // Добавляем стили для таблицы при монтировании компонента
-    const style = document.createElement("style");
-
-    style.textContent = `
-      .custom-table-styles table td:nth-child(4),
-      .custom-table-styles table th:nth-child(4) {
-        width: 13%;
-      }
-      .custom-table-styles table td:nth-child(5),
-      .custom-table-styles table th:nth-child(5) {
-        width: 5%;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      // Удаляем стили при размонтировании
-      document.head.removeChild(style);
-    };
-  }, []);
 
   return (
     <div>

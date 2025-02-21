@@ -130,11 +130,12 @@ const Editor: FC<EditorProps> = ({
     style.textContent = `
       .custom-table-styles table td:nth-child(4),
       .custom-table-styles table th:nth-child(4) {
-        width: 13%;
+        width: 20%;
       }
       .custom-table-styles table td:nth-child(5),
       .custom-table-styles table th:nth-child(5) {
-        width: 5%;
+        width: 3%;
+        display: none;
       }
     `;
     document.head.appendChild(style);

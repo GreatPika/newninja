@@ -1216,8 +1216,3 @@
   margin-top: 0 !important;
 }
 
-.hide-last-column table tr th:last-child,
-.hide-last-column table tr td:last-child {
-  display: none;
-}
-

@@ -134,7 +134,7 @@ const Editor: FC<EditorProps> = ({
       }
       .custom-table-styles table td:nth-child(5),
       .custom-table-styles table th:nth-child(5) {
-        width: 5%;
+        width: 3%;
       }
     `;
     document.head.appendChild(style);

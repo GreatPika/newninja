@@ -104,3 +104,29 @@
   --basePageBg: rgb(20, 20, 20);
   background: var(--basePageBg);
 }
+
+/* Стили для таблицы */
+.mdxeditor table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.mdxeditor table th:nth-child(1),
+.mdxeditor table td:nth-child(1) {
+  width: 40%;
+}
+
+.mdxeditor table th:nth-child(2),
+.mdxeditor table td:nth-child(2) {
+  width: 40%;
+}
+
+.mdxeditor table th:nth-child(3),
+.mdxeditor table td:nth-child(3) {
+  width: 15%;
+}
+
+.mdxeditor table th:nth-child(4),
+.mdxeditor table td:nth-child(4) {
+  width: 5%;
+}

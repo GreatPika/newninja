@@ -16,14 +16,13 @@ export const exportMessagesToExcel = async () => {
       async (tables, msg) => {
         const parsed = await parseMarkdownTable(msg.text);
 
-        if (parsed) {
-          parsed.headers = parsed.headers.slice(0, -1);
-          parsed.rows = parsed.rows.map((row) => row.slice(0, -1));
-
-          return [...(await tables), { ...parsed, productName: msg.role }];
-        }
-
-        return await tables;
+        return parsed
+          ? [...(await tables), { 
+              headers: parsed.headers.slice(0, -1),
+              rows: parsed.rows.map(row => row.slice(0, -1)),
+              productName: msg.role 
+            }]
+          : await tables;
       },
       Promise.resolve([]) as Promise<
         { headers: string[]; rows: string[][]; productName: string }[]

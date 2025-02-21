@@ -104,3 +104,20 @@
   --basePageBg: rgb(20, 20, 20);
   background: var(--basePageBg);
 }
+
+/* Скрываем 4-ю колонку таблицы */
+.mdxeditor table td:nth-child(4),
+.mdxeditor table th:nth-child(4) {
+  width: 0 !important;
+  max-width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+}

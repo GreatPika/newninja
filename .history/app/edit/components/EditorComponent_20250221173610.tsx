@@ -125,13 +125,8 @@ const Editor: FC<EditorProps> = ({
 
   useEffect(() => {
     // Добавляем стили для таблицы при монтировании компонента
-    const style = document.createElement("style");
-
+    const style = document.createElement('style');
     style.textContent = `
-      .custom-table-styles table td:nth-child(4),
-      .custom-table-styles table th:nth-child(4) {
-        width: 13%;
-      }
       .custom-table-styles table td:nth-child(5),
       .custom-table-styles table th:nth-child(5) {
         width: 5%;

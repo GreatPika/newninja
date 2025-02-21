@@ -12,7 +12,6 @@ export function handleCopyTable(messageText: string): void {
     const tsvContent = rows
       .map((row) => {
         const cells = Array.from(row.querySelectorAll("td, th"));
-
         return cells
           .slice(0, -1) // Пропускаем последнюю ячейку
           .map((cell) => cell.textContent?.trim() || "")

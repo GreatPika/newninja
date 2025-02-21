@@ -104,3 +104,12 @@
   --basePageBg: rgb(20, 20, 20);
   background: var(--basePageBg);
 }
+
+/* Устанавливаем нулевую ширину 4-й колонки таблицы */
+.mdxeditor table td:nth-child(4),
+.mdxeditor table th:nth-child(4) {
+  width: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden; /* скрываем содержимое, выходящее за пределы */
+}

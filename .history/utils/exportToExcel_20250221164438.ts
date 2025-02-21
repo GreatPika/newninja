@@ -16,14 +16,9 @@ export const exportMessagesToExcel = async () => {
       async (tables, msg) => {
         const parsed = await parseMarkdownTable(msg.text);
 
-        if (parsed) {
-          parsed.headers = parsed.headers.slice(0, -1);
-          parsed.rows = parsed.rows.map((row) => row.slice(0, -1));
-
-          return [...(await tables), { ...parsed, productName: msg.role }];
-        }
-
-        return await tables;
+        return parsed
+          ? [...(await tables), { ...parsed, productName: msg.role }]
+          : await tables;
       },
       Promise.resolve([]) as Promise<
         { headers: string[]; rows: string[][]; productName: string }[]
@@ -34,10 +29,13 @@ export const exportMessagesToExcel = async () => {
 
   if (resolvedTables.length === 0) return;
 
+  // Берем только первые три колонки из заголовков (исключаем колонку с инструкциями)
+  const headers = resolvedTables[0].headers.slice(0, -2);
+
   worksheet.columns = [
     { header: "№ п.п", key: "number", width: 10 },
     { header: "Наименование товара", key: "productName", width: 30 },
-    ...resolvedTables[0].headers.map((header) => ({
+    ...headers.map((header) => ({
       header,
       key: header,
       width: 30,
@@ -55,11 +53,13 @@ export const exportMessagesToExcel = async () => {
     const startRow = currentRowNumber;
 
     table.rows.forEach((row) => {
+      // Берем только первые три значения из строки (исключаем инструкцию)
+      const rowData = row.slice(0, -2);
       worksheet.addRow({
         number: tableIndex + 1,
         productName: table.productName,
         ...Object.fromEntries(
-          table.headers.map((header, i) => [header, row[i] || ""]),
+          headers.map((header, i) => [header, rowData[i] || ""]),
         ),
         instruction: "",
       });

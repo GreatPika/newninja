@@ -15,6 +15,7 @@ import {
   frontmatterPlugin,
   markdownShortcutPlugin,
   StrikeThroughSupSubToggles,
+  ButtonWithTooltip,
 } from "@mdxeditor/editor";
 import {
   UndoRedo,
@@ -23,7 +24,6 @@ import {
 } from "@mdxeditor/editor";
 import { FC, useRef, useState, useEffect } from "react";
 import { useTheme } from "next-themes";
-
 import { SymbolButton } from "./SymbolButton";
 
 interface EditorProps {
@@ -52,16 +52,14 @@ const Editor: FC<EditorProps> = ({
   const [, setColumn4Value] = useState<string | null>(null);
 
   const getEditorClassName = () => {
-    return `${theme === "dark" ? "dark-theme dark-editor" : "light-editor"} custom-table-styles`;
+    return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
   };
 
   const insertSymbolAtCursor = (symbol: string) => {
     const editor = editorRef?.current || localEditorRef.current;
-
     if (editor) {
       const escapedSymbol =
         symbol === "<" ? "&lt;" : symbol === ">" ? "&gt;" : symbol;
-
       editor.insertMarkdown(escapedSymbol);
     }
   };
@@ -123,28 +121,6 @@ const Editor: FC<EditorProps> = ({
     };
   }, [sourceData, onRowInfoChange]);
 
-  useEffect(() => {
-    // Добавляем стили для таблицы при монтировании компонента
-    const style = document.createElement("style");
-
-    style.textContent = `
-      .custom-table-styles table td:nth-child(4),
-      .custom-table-styles table th:nth-child(4) {
-        width: 13%;
-      }
-      .custom-table-styles table td:nth-child(5),
-      .custom-table-styles table th:nth-child(5) {
-        width: 5%;
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      // Удаляем стили при размонтировании
-      document.head.removeChild(style);
-    };
-  }, []);
-
   return (
     <div>
       <MDXEditor
@@ -171,26 +147,10 @@ const Editor: FC<EditorProps> = ({
                       <BoldItalicUnderlineToggles />
                       <StrikeThroughSupSubToggles />
                       <InsertTable />
-                      <SymbolButton
-                        symbol="≥"
-                        title="Insert ≥"
-                        onInsertSymbol={insertSymbolAtCursor}
-                      />
-                      <SymbolButton
-                        symbol="≤"
-                        title="Insert ≤"
-                        onInsertSymbol={insertSymbolAtCursor}
-                      />
-                      <SymbolButton
-                        symbol=">"
-                        title="Insert >"
-                        onInsertSymbol={insertSymbolAtCursor}
-                      />
-                      <SymbolButton
-                        symbol="<"
-                        title="Insert <"
-                        onInsertSymbol={insertSymbolAtCursor}
-                      />
+                      <SymbolButton symbol="≥" title="Insert ≥" onInsertSymbol={insertSymbolAtCursor} />
+                      <SymbolButton symbol="≤" title="Insert ≤" onInsertSymbol={insertSymbolAtCursor} />
+                      <SymbolButton symbol=">" title="Insert >" onInsertSymbol={insertSymbolAtCursor} />
+                      <SymbolButton symbol="<" title="Insert <" onInsertSymbol={insertSymbolAtCursor} />
                     </>
                   ),
                 }),
