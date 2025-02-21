@@ -8,10 +8,11 @@ import {
 } from "@nextui-org/navbar";
 import NextLink from "next/link";
 import { Button } from "@nextui-org/button";
-import { Settings } from "lucide-react";
+import { Settings, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { ThemeSwitch } from "@/app/chat/components/theme-switch";
+import { exportMessagesToExcel } from "@/app/chat/utils/exportToExcel";
 
 export const NavBar = () => {
   const router = useRouter();
@@ -24,6 +25,17 @@ export const NavBar = () => {
       onClick={() => router.push("/settings")}
     >
       <Settings size={22} strokeWidth={1.5} />
+    </Button>
+  );
+
+  const downloadButton = (
+    <Button
+      isIconOnly
+      radius="md"
+      variant="light"
+      onClick={exportMessagesToExcel}
+    >
+      <Download size={22} strokeWidth={1.5} />
     </Button>
   );
 
@@ -43,6 +55,7 @@ export const NavBar = () => {
       <NavbarContent className="gap-2" justify="end">
         <div className="flex">
           <ThemeSwitch />
+          {downloadButton}
           {userButton}
         </div>
         <NavbarMenuToggle className="sm:hidden" />

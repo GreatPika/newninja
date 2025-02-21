@@ -12,7 +12,7 @@ import { Settings, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { ThemeSwitch } from "@/app/chat/components/theme-switch";
-import { exportMessagesToExcel } from "@/utils/exportToExcel";
+import { exportMessagesToExcel } from "@/app/chat/utils/exportToExcel";
 
 export const NavBar = () => {
   const router = useRouter();

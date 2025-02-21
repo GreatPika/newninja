@@ -10,7 +10,7 @@ import {
   saveMessageToDB,
   deleteMessageFromDB,
 } from "@/utils/messages";
-import { getAssistantResponse } from "@/utils/api";
+import { getAssistantResponse } from "@/app/chat/utils/getAssistantResponse";
 
 interface ChatContainerProps {
   baseURL: string;

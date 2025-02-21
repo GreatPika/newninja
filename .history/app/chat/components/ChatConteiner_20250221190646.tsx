@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { Alert } from "@nextui-org/react";
+import { Card, CardBody } from "@nextui-org/react";
 
 import { PromptInput } from "@/app/chat/components/PromptInput";
 import { MessageConteiner } from "@/app/chat/components/MessageConteiner";
@@ -10,7 +10,7 @@ import {
   saveMessageToDB,
   deleteMessageFromDB,
 } from "@/utils/messages";
-import { getAssistantResponse } from "@/utils/api";
+import { getAssistantResponse } from "@/app/chat/utils/getAssistantResponse";
 
 interface ChatContainerProps {
   baseURL: string;
@@ -87,10 +87,13 @@ export function ChatContainer({
       <div className="w-[800px] mx-auto flex flex-col bg-background flex-grow pb-20">
         {messages.length === 0 && emptyStateMessage ? (
           <div className="flex items-center justify-center flex-grow">
-            <Alert
-              title="Empty Chat"
-              description={emptyStateMessage}
-            />
+            <Card radius="lg">
+              <CardBody>
+                <p className="text-left text-foreground/80 whitespace-pre-line">
+                  {emptyStateMessage}
+                </p>
+              </CardBody>
+            </Card>
           </div>
         ) : (
           <MessageConteiner

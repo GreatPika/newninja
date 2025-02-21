@@ -1,7 +1,7 @@
 import { useSnackbar } from "notistack";
 import { useCallback } from "react";
 
-import { handleCopyTable } from "@/utils/handleCopyTable";
+import { handleCopyTable } from "@/app/chat/utils/handleCopyTable";
 
 export function useCopyTable() {
   const { enqueueSnackbar } = useSnackbar();
