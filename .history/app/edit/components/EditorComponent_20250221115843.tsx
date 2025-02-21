@@ -22,7 +22,7 @@ import {
   BoldItalicUnderlineToggles,
   InsertTable,
 } from "@mdxeditor/editor";
-import { FC, useRef, useState, useEffect } from "react";
+import { FC, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 interface EditorProps {
@@ -90,36 +90,13 @@ const Editor: FC<EditorProps> = ({
     </ButtonWithTooltip>
   );
 
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
-      if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
-        if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
-          setActiveRow(rowIndex);
-
-          return;
-        }
-      }
-
-      setActiveRow(null);
-    };
-
-    const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
-
-    editorElement?.addEventListener("click", handleClick as EventListener);
-
-    return () => {
-      editorElement?.removeEventListener("click", handleClick as EventListener);
-    };
-  }, []);
+  const handleTableCellClick = (event: React.MouseEvent) => {
+    const rowElement = (event.target as HTMLElement).closest('tr');
+    if (rowElement) {
+      const rowIndex = rowElement.getAttribute('data-rowindex');
+      setActiveRow(rowIndex ? parseInt(rowIndex) + 1 : null);
+    }
+  };
 
   return (
     <div>
@@ -134,7 +111,19 @@ const Editor: FC<EditorProps> = ({
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),
-          tablePlugin(),
+          tablePlugin({
+            cellContentDecorators: [
+              (cell, rowIndex) => {
+                return {
+                  props: {
+                    onClick: handleTableCellClick,
+                    'data-rowindex': rowIndex,
+                    style: { cursor: 'pointer' }
+                  }
+                };
+              }
+            ]
+          }),
           thematicBreakPlugin(),
           frontmatterPlugin(),
           markdownShortcutPlugin(),
@@ -159,16 +148,8 @@ const Editor: FC<EditorProps> = ({
         ]}
         onChange={onContentChange}
       />
-      {activeRow !== null && (
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "8px",
-            backgroundColor: theme === "dark" ? "#333" : "#f0f0f0",
-            color: theme === "dark" ? "#fff" : "#000",
-            borderRadius: "4px",
-          }}
-        >
+      {activeRow && (
+        <div style={{ marginTop: '10px', color: theme === 'dark' ? '#fff' : '#000' }}>
           Активная строка таблицы: {activeRow}
         </div>
       )}

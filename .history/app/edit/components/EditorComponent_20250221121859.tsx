@@ -41,6 +41,7 @@ const Editor: FC<EditorProps> = ({
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [activeCell, setActiveCell] = useState<number | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -93,29 +94,31 @@ const Editor: FC<EditorProps> = ({
   useEffect(() => {
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
+      const cell = target.closest<HTMLTableCellElement>('td, th');
+      
       if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
+        const row = cell.closest('tr');
+        const table = row?.closest('table');
+        
         if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
+          const rowIndex = Array.from(table.rows).indexOf(row) + 1;
+          const cellIndex = Array.from(row.cells).indexOf(cell) + 1;
+          
+          console.log(`Строка: ${rowIndex}, Ячейка: ${cellIndex}`);
           setActiveRow(rowIndex);
-
+          setActiveCell(cellIndex);
           return;
         }
       }
-
+      
       setActiveRow(null);
+      setActiveCell(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
-
+    
     editorElement?.addEventListener("click", handleClick as EventListener);
-
+    
     return () => {
       editorElement?.removeEventListener("click", handleClick as EventListener);
     };
@@ -169,7 +172,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка таблицы: {activeRow}
+          Строка: {activeRow}, Ячейка: {activeCell}
         </div>
       )}
     </div>

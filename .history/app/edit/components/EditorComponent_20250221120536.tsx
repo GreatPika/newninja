@@ -22,7 +22,7 @@ import {
   BoldItalicUnderlineToggles,
   InsertTable,
 } from "@mdxeditor/editor";
-import { FC, useRef, useState, useEffect } from "react";
+import { FC, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 
 interface EditorProps {
@@ -90,36 +90,18 @@ const Editor: FC<EditorProps> = ({
     </ButtonWithTooltip>
   );
 
-  useEffect(() => {
-    const handleClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
+  const handleTableCellClick = (event: React.MouseEvent) => {
+    const rowElement = (event.target as HTMLElement).closest("tr");
+    console.log('Клик по ячейке таблицы', rowElement);
 
-      if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
-        if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
-          setActiveRow(rowIndex);
-
-          return;
-        }
-      }
-
-      setActiveRow(null);
-    };
-
-    const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
-
-    editorElement?.addEventListener("click", handleClick as EventListener);
-
-    return () => {
-      editorElement?.removeEventListener("click", handleClick as EventListener);
-    };
-  }, []);
+    if (rowElement) {
+      const rowIndex = rowElement.getAttribute("data-rowindex");
+      console.log('Найденный rowIndex:', rowIndex);
+      const parsedIndex = rowIndex ? parseInt(rowIndex) + 1 : null;
+      setActiveRow(parsedIndex);
+      console.log('Установлен activeRow:', parsedIndex);
+    }
+  };
 
   return (
     <div>
@@ -134,7 +116,15 @@ const Editor: FC<EditorProps> = ({
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),
-          tablePlugin(),
+          tablePlugin({
+            cellAttributes: [
+              (cell: HTMLTableCellElement, rowIndex: number) => ({
+                onClick: handleTableCellClick,
+                "data-rowindex": rowIndex,
+                style: { cursor: "pointer" },
+              }),
+            ],
+          } as any),
           thematicBreakPlugin(),
           frontmatterPlugin(),
           markdownShortcutPlugin(),
@@ -166,7 +156,7 @@ const Editor: FC<EditorProps> = ({
             padding: "8px",
             backgroundColor: theme === "dark" ? "#333" : "#f0f0f0",
             color: theme === "dark" ? "#fff" : "#000",
-            borderRadius: "4px",
+            borderRadius: "4px"
           }}
         >
           Активная строка таблицы: {activeRow}

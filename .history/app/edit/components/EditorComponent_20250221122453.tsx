@@ -100,11 +100,17 @@ const Editor: FC<EditorProps> = ({
         const table = row?.closest("table");
 
         if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
+          // Получаем все строки тела таблицы (игнорируя заголовки)
+          const tbodyRows = Array.from(table.tBodies).flatMap(tbody => 
+            Array.from(tbody.rows)
+          );
+          
+          // Если есть заголовок (thead) - игнорируем его строки
+          const headerRowCount = table.tHead?.rows.length || 0;
+          const rowIndex = tbodyRows.indexOf(row) + 1 + headerRowCount;
+          
+          console.log(`Активная строка: ${rowIndex}`);
           setActiveRow(rowIndex);
-
           return;
         }
       }

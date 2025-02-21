@@ -41,6 +41,7 @@ const Editor: FC<EditorProps> = ({
   const { theme } = useTheme();
   const localEditorRef = useRef<MDXEditorMethods | null>(null);
   const [activeRow, setActiveRow] = useState<number | null>(null);
+  const [activeCell, setActiveCell] = useState<number | null>(null);
 
   const getEditorClassName = () => {
     return theme === "dark" ? "dark-theme dark-editor" : "light-editor";
@@ -100,16 +101,19 @@ const Editor: FC<EditorProps> = ({
         const table = row?.closest("table");
 
         if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
+          const rowIndex = Array.from(table.rows).indexOf(row) + 1;
+          const cellIndex = Array.from(row.cells).indexOf(cell) + 1;
 
+          console.log(`Строка: ${rowIndex}, Ячейка: ${cellIndex}`);
           setActiveRow(rowIndex);
+          setActiveCell(cellIndex);
 
           return;
         }
       }
 
       setActiveRow(null);
+      setActiveCell(null);
     };
 
     const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
@@ -169,7 +173,7 @@ const Editor: FC<EditorProps> = ({
             borderRadius: "4px",
           }}
         >
-          Активная строка таблицы: {activeRow}
+          Строка: {activeRow}, Ячейка: {activeCell}
         </div>
       )}
     </div>

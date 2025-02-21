@@ -91,33 +91,23 @@ const Editor: FC<EditorProps> = ({
   );
 
   useEffect(() => {
-    const handleClick = (e: Event) => {
+    const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
-      if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
-        if (row && table) {
-          const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
-          const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
-          setActiveRow(rowIndex);
-
-          return;
+      if (target.tagName === 'TD' || target.tagName === 'TH') {
+        const row = target.closest('tr');
+        if (row) {
+          const rowIndex = row.rowIndex; // Получаем индекс строки из DOM
+          console.log('Номер строки:', rowIndex);
+          setActiveRow(rowIndex + 1); // +1 так как индексы начинаются с 0
         }
       }
-
-      setActiveRow(null);
     };
 
-    const editorElement = document.querySelector<HTMLElement>(".mdxeditor");
-
-    editorElement?.addEventListener("click", handleClick as EventListener);
-
+    const editorElement = document.querySelector('.mdxeditor');
+    editorElement?.addEventListener('click', handleClick);
+    
     return () => {
-      editorElement?.removeEventListener("click", handleClick as EventListener);
+      editorElement?.removeEventListener('click', handleClick);
     };
   }, []);
 
@@ -134,7 +124,22 @@ const Editor: FC<EditorProps> = ({
           linkPlugin(),
           linkDialogPlugin(),
           imagePlugin(),
-          tablePlugin(),
+          tablePlugin({
+            cellAttributes: [
+              (cell: HTMLTableCellElement, rowIndex: number) => {
+                console.log("Applying cell attributes for row:", rowIndex);
+
+                return {
+                  onClick: (e: React.MouseEvent) => {
+                    console.log("Cell click event:", e);
+                    handleTableCellClick(e);
+                  },
+                  "data-rowindex": rowIndex,
+                  style: { cursor: "pointer" },
+                };
+              },
+            ],
+          } as any),
           thematicBreakPlugin(),
           frontmatterPlugin(),
           markdownShortcutPlugin(),

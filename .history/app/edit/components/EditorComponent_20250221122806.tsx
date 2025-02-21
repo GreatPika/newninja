@@ -103,6 +103,7 @@ const Editor: FC<EditorProps> = ({
           const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
           const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
 
+          console.log(`Активная строка: ${rowIndex}`);
           setActiveRow(rowIndex);
 
           return;

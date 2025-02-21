@@ -93,22 +93,22 @@ const Editor: FC<EditorProps> = ({
   useEffect(() => {
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
-      const cell = target.closest<HTMLTableCellElement>("td, th");
-
+      const cell = target.closest<HTMLTableCellElement>('td, th');
+      
       if (cell) {
-        const row = cell.closest("tr");
-        const table = row?.closest("table");
-
+        const row = cell.closest('tr');
+        const table = row?.closest('table');
+        
         if (row && table) {
           const rows = Array.from(table.tBodies[0].rows); // Игнорируем thead
           const rowIndex = rows.indexOf(row) + 1; // Начинаем с 1
-
+          
+          console.log(`Активная строка: ${rowIndex}`);
           setActiveRow(rowIndex);
-
           return;
         }
       }
-
+      
       setActiveRow(null);
     };
 
