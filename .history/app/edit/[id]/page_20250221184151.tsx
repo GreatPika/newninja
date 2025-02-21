@@ -6,10 +6,12 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
+import { updateMessage, getMessageById } from "@/utils/indexedDB";
 import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
-import { useDisableScroll } from "@/app/edit/hooks/useDisableScroll";
-import { useMessageLoader } from "@/app/edit/hooks/useMessageLoader";
-import { useMessageUpdater } from "@/app/edit/hooks/useMessageUpdater";
+import { useDisableScroll } from "@/app/hooks/useDisableScroll";
+import { useMessageLoader } from "@/app/hooks/useMessageLoader";
+import { useMessageUpdater } from "@/app/hooks/useMessageUpdater";
+import { convertSourceToText } from "@/utils/convertSource";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
@@ -18,13 +20,12 @@ const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
 
 export default function EditPage() {
   const params = useParams();
-  const messageId =
-    typeof params.id === "string" ? parseInt(params.id, 10) : null;
-
+  const messageId = typeof params.id === "string" ? parseInt(params.id, 10) : null;
+  
   useDisableScroll();
   const { markdown, sourceData, isReady } = useMessageLoader(messageId);
   const { handleContentChange } = useMessageUpdater();
-
+  
   const [pageRowInfo, setPageRowInfo] = useState<{
     activeRow: number | null;
     column4Value: string | null;
@@ -48,7 +49,7 @@ export default function EditPage() {
               key={markdown}
               markdown={markdown}
               sourceData={sourceData}
-              onContentChange={handleContentChange(messageId)}
+              onContentChange={handleContentChange}
               onRowInfoChange={setPageRowInfo}
             />
           </div>

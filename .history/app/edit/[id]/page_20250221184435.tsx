@@ -7,9 +7,9 @@ import { useParams } from "next/navigation";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 
 import { TableRowInfo } from "@/app/edit/components/TableRowInfo";
-import { useDisableScroll } from "@/app/edit/hooks/useDisableScroll";
-import { useMessageLoader } from "@/app/edit/hooks/useMessageLoader";
-import { useMessageUpdater } from "@/app/edit/hooks/useMessageUpdater";
+import { useDisableScroll } from "@/app/hooks/useDisableScroll";
+import { useMessageLoader } from "@/app/hooks/useMessageLoader";
+import { useMessageUpdater } from "@/app/hooks/useMessageUpdater";
 
 const Editor = dynamic(() => import("@/app/edit/components/EditorComponent"), {
   ssr: false,
