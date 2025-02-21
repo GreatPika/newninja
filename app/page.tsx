@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Card, CardBody, Tabs, Tab, NextUIProvider } from "@nextui-org/react";
+import { Card, CardBody, Tabs, Tab, HeroUIProvider } from "@heroui/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 import LoginForm from "@/app/login/components/LoginForm";
@@ -15,7 +15,7 @@ export default function Page() {
 
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" value={{}}>
-      <NextUIProvider>
+      <HeroUIProvider>
         <div className="flex items-center justify-center w-full min-h-screen nextui-theme">
           <Card disableAnimation>
             <CardBody className="overflow-hidden w-[343px]">
@@ -37,7 +37,7 @@ export default function Page() {
             </CardBody>
           </Card>
         </div>
-      </NextUIProvider>
+      </HeroUIProvider>
     </NextThemesProvider>
   );
 }

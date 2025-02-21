@@ -5,9 +5,9 @@ import {
   NavbarContent,
   NavbarMenuToggle,
   NavbarBrand,
-} from "@nextui-org/navbar";
+} from "@heroui/navbar";
 import NextLink from "next/link";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { Settings, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 

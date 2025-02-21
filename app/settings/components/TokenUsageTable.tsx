@@ -7,7 +7,7 @@ import {
   TableCell,
   Spinner,
   Button,
-} from "@nextui-org/react";
+} from "@heroui/react";
 
 import { TokenUsageData } from "@/types";
 import { formatDate } from "@/utils/formatDate";

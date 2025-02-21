@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Input, InputProps } from "@nextui-org/react";
+import { Input, InputProps } from "@heroui/react";
 
 interface EmailInputProps extends Omit<InputProps, "onChange"> {
   onChange: (value: string) => void;

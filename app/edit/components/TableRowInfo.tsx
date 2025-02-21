@@ -1,5 +1,5 @@
 import { useTheme } from "next-themes";
-import { Card, CardBody } from "@nextui-org/react";
+import { Card, CardBody } from "@heroui/react";
 
 interface TableRowInfoProps {
   activeRow: number | null;

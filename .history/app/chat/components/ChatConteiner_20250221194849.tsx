@@ -88,11 +88,9 @@ export function ChatContainer({
         {messages.length === 0 && emptyStateMessage ? (
           <div className="flex items-center justify-center flex-grow">
             <Alert
-              className="w-full"
-              color="warning"
               description={emptyStateMessage}
               title=""
-              variant="faded"
+              className="w-full"
             />
           </div>
         ) : (

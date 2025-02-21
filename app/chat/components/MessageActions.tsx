@@ -1,6 +1,6 @@
 // components/MessageActions.tsx
 
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { Pencil, Copy, Trash } from "lucide-react";
 
 import { Message } from "@/types/index";

@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import { Button } from "@nextui-org/button";
+import { Button } from "@heroui/button";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 

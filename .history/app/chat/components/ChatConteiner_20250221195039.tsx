@@ -89,10 +89,10 @@ export function ChatContainer({
           <div className="flex items-center justify-center flex-grow">
             <Alert
               className="w-full"
-              color="warning"
               description={emptyStateMessage}
               title=""
-              variant="faded"
+              variant="bordered"
+              color="warning"
             />
           </div>
         ) : (

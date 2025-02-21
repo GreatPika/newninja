@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { Alert } from "@heroui/react";
+import { Card, CardBody, Alert } from "@heroui/react";
 
 import { PromptInput } from "@/app/chat/components/PromptInput";
 import { MessageConteiner } from "@/app/chat/components/MessageConteiner";
@@ -87,13 +87,13 @@ export function ChatContainer({
       <div className="w-[800px] mx-auto flex flex-col bg-background flex-grow pb-20">
         {messages.length === 0 && emptyStateMessage ? (
           <div className="flex items-center justify-center flex-grow">
-            <Alert
-              className="w-full"
-              color="warning"
-              description={emptyStateMessage}
-              title=""
-              variant="faded"
-            />
+            <Card radius="lg">
+              <CardBody>
+                <p className="text-left text-foreground/80 whitespace-pre-line">
+                  {emptyStateMessage}
+                </p>
+              </CardBody>
+            </Card>
           </div>
         ) : (
           <MessageConteiner

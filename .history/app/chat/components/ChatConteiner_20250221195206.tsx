@@ -92,7 +92,7 @@ export function ChatContainer({
               color="warning"
               description={emptyStateMessage}
               title=""
-              variant="faded"
+              variant="bordered"
             />
           </div>
         ) : (

@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Button, Card, CardBody } from "@nextui-org/react";
+import { Button, Card, CardBody } from "@heroui/react";
 import { Wallet } from "lucide-react";
 
 interface BalanceCardProps {

@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardFooter,
   Input,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import "@/styles/github-markdown-custom.css";
 import { useRouter } from "next/navigation";
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, CardBody, Textarea, Button } from "@nextui-org/react";
+import { Card, CardBody, Textarea, Button } from "@heroui/react";
 import { ArrowUp } from "lucide-react";
 
 import { textareaClassNames } from "@/styles/styles";

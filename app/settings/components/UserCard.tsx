@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { Button } from "@nextui-org/react";
-import { Card, CardBody } from "@nextui-org/react";
+import { Button } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 
 import { signOut } from "@/utils/supabase";
 
