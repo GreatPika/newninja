@@ -123,6 +123,30 @@ const Editor: FC<EditorProps> = ({
     };
   }, [sourceData, onRowInfoChange]);
 
+  useEffect(() => {
+    const style = document.createElement("style");
+
+    style.textContent = `
+      .custom-table-styles table td:nth-child(4),
+      .custom-table-styles table th:nth-child(4) {
+        width: 13%;
+      }
+      .custom-table-styles table td:nth-child(5),
+      .custom-table-styles table th:nth-child(5) {
+        width: 0;
+        padding: 0;
+        font-size: 0;
+        line-height: 0;
+        color: transparent;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div>
       <MDXEditor

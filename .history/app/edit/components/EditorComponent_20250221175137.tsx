@@ -123,6 +123,28 @@ const Editor: FC<EditorProps> = ({
     };
   }, [sourceData, onRowInfoChange]);
 
+  useEffect(() => {
+    // Добавляем стили для таблицы при монтировании компонента
+    const style = document.createElement("style");
+
+    style.textContent = `
+      .custom-table-styles table td:nth-child(4),
+      .custom-table-styles table th:nth-child(4) {
+        width: 13%;
+      }
+      .custom-table-styles table td:nth-child(5),
+      .custom-table-styles table th:nth-child(5) {
+        width: 5%;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      // Удаляем стили при размонтировании
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <div>
       <MDXEditor
